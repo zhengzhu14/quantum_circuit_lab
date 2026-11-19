@@ -1,0 +1,59 @@
+\documentclass[12pt]{article}
+
+% ---------- Paquetes ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+%\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{braket}
+\usepackage{graphicx}
+
+\usepackage[dvipsnames]{xcolor}
+\usepackage[margin=2.5cm]{geometry}
+
+
+% ---------- Tipografía: EB Garamond (si está instalada) ----------
+%\IfFileExists{ebgaramond.sty}{\usepackage{ebgaramond}}{\usepackage{mathpazo}}
+\IfFileExists{lmodern.sty}{\usepackage{lmodern}}{}
+
+% ---------- Color del logo de la UAM ----------
+%\definecolor{uamazul}{RGB}{0,114,206}
+
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+
+% ---------- Datos del documento ----------
+%\title{Práctica 2: Algoritmos cuánticos básicos con Qiskit}
+%\author{Zhengkai Zhu\\ 
+%        Marco López Borrego}
+%\date{}
+
+\begin{document}
+
+% ---------- Portada ----------
+\input{portada}
+
+
+\tableofcontents
+\newpage
+
+% ---------- Secciones (cada una en su propio fichero) ----------
+\input{sections/objetivos}
+\input{sections/bloque1}
+\input{sections/bloque2}
+\input{sections/bloque3}
+\input{sections/bloque4}
+\input{sections/bloque5}
+
+% ---------- Bibliografía (opcional) ----------
+% \bibliographystyle{plain}
+% \bibliography{referencias}
+
+\end{document}

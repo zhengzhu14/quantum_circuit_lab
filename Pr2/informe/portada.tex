@@ -1,0 +1,48 @@
+% ============================================================
+%  Portada
+%  Coloca el logo en imagenes/logo_uam.png (si no existe se
+%  muestra un texto azul de sustitución).
+% ============================================================
+
+% ---- Datos de la portada (edita aquí) ----
+\newcommand{\PortadaTitulo}{Práctica 2: Algoritmos cuánticos básicos con Qiskit}
+\newcommand{\PortadaMaster}{Máster en Computación Cuántica}
+\newcommand{\PortadaAsignatura}{Laboratorio de Computación en Circuitos cuánticos}
+\newcommand{\PortadaCurso}{Curso 2026-2027}
+
+\begin{titlepage}
+  \centering
+  \vspace*{0.5cm}
+
+  % ---- Logo ----
+  \IfFileExists{imagenes/Logo_UAM.jpg}{%
+    \includegraphics[width=0.45\textwidth]{imagenes/Logo_UAM.jpg}%
+  }{%
+    {\color{uamazul}\Huge\bfseries UAM}\\[2pt]
+    {\color{uamazul}\Large Universidad Autónoma\\de Madrid}%
+  }
+
+  \vspace{2cm}
+
+  % ---- Título ----
+  {\fontsize{24}{32}\selectfont\bfseries \PortadaTitulo\par}
+
+  \vspace{2cm}
+
+  % ---- Máster, asignatura y curso ----
+  {\Large\bfseries \PortadaMaster\par}
+  \vspace{4pt}
+  {\large\itshape \PortadaAsignatura\par}
+  \vspace{8pt}
+  {\large \PortadaCurso\par}
+
+  \vspace{2.2cm}
+
+  % ---- Alumnos ----
+  {\large\bfseries Alumnos\par}
+  \vspace{4pt}
+  {\normalsize Zhengkai Zhu\par}
+  {\normalsize Marco López Borrego\par}
+
+  \vfill
+\end{titlepage}

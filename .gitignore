@@ -218,3 +218,53 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+
+
+
+# Auxiliares de LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.nav
+*.snm
+*.vrb
+
+# Bibliografía (BibTeX / Biber)
+*.bbl
+*.blg
+*.bcf
+*.run.xml
+
+# Índices y glosarios
+*.idx
+*.ilg
+*.ind
+*.glo
+*.gls
+*.glg
+*.acn
+*.acr
+*.alg
+
+# Otros
+*.xdv
+*.dvi
+*.ps
+*.lol
+*.thm
+*.tdo
+*.pyg
+_minted*/
+latex.out/
+
+# PDF generado (descomenta si no quieres versionarlo)
+# *.pdf
