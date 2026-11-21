@@ -1,2 +1,559 @@
-\section{Bloque 5}
-\label{sec:bloque_5}
+\section{Bloque 5}\label{sec:bloque_5}
+\subsection{Ejercicio 5.1. Fase exacta: Puerta S}
+Tenemos $t=2$ para la puerta:
+\[S = \begin{pmatrix}
+    1 & 0\\
+    0 & i
+\end{pmatrix}\]
+y el autovector $\ket{\phi} = \ket{1}$. Se ha implementado el circuito de QPE y se ha medido el registro de conteo. 
+El histograma obtenido se muestra en la Figura~\ref{fig:bloque5_e5_1}.
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e5_1_circuito.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.7\textwidth]{imagenes/bloque5/e5_1_histograma.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Circuito construido\\
+    (b): Histograma obtenido tras la implementación de QPE para la puerta $S$ y el autovector $\ket{\phi} = \ket{1}$.}\label{fig:bloque5_e5_1}
+\end{figure}
+
+El resultado medido es determinista tal y como se comenta en el enunciado, midiendo un 
+$\ket{m} = \ket{01} \equiv 1$, que corresponde a la fase estimada $\tilde\varphi = 1/2^2$. Es una estimación
+exacta de la fase $\theta = 1/4$. 
+
+\subsection{Ejercicio 5.2. Fase no exacta con pocos qubits}
+Tenemos $t=2$ para la puerta $U = P(\varphi)$:
+\begin{itemize}
+    \item Caso 1: $\varphi = 4\pi/5$ ($\theta = 2/5$)
+    \item Caso 2: $\varphi = 6\pi/32$ ($\theta = 3/32$)
+\end{itemize}
+
+En la Figura~\ref{fig:bloque5_e5_2_1} se muestra el circuito implementado y el histograma obtenido para el primer caso que estima
+$U = P(\varphi)$ con $\varphi = 4\pi/5$. El estado más frecuente medido $\ket{m} = \ket{10} \equiv 2$, por lo tanto, 
+el estado estimado es $\tilde\varphi = 2/2^2 = 1/2$, que es una estimación aproximada de la fase $\theta = 2/5$ con error
+$|\tilde\varphi - 2/5| = 0.1$.
+
+En la Figura~\ref{fig:bloque5_e5_2_2} se muestra el circuito implementado y el histograma obtenido para el segundo caso que estima
+$U = P(\varphi)$ con $\varphi = 6\pi/32$. El estado más frecuente medido $\ket{m} = \ket{0} \equiv 0$, por lo tanto, 
+el estado estimado es $\tilde\varphi = 0$, que es una estimación aproximada de la fase $\theta = 3/32$ con error
+$|\tilde\varphi - 3/32| = 0.0938$.
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e5_2_circuit1.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e5_2_histograma1.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Circuito QPE para $\varphi = 4\pi/5$\\
+    (b): Histograma obtenido para el QPE con $\varphi = 4\pi/5$.}
+    \label{fig:bloque5_e5_2_1}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e5_2_circuit2.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e5_2_histograma2.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Circuito QPE para $\varphi = 6\pi/32$\\
+    (b): Histograma obtenido para el QPE con $\varphi = 6\pi/32$.}\label{fig:bloque5_e5_2_2}
+\end{figure}
+
+
+\subsection{Ejercicio 5.3. Aumento del número de qubits de conteo}
+En este ejercicio se repite el ejercicio anterior pero aumentando el número de qubits de conteo a $t=5$. 
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e5_3_histograma1.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e5_3_histograma2.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Histograma para QPE con $t = 5$ para la fase $\varphi = 4\pi/5$\\
+    (b): Histograma para QPE con $t = 5$ para la fase $\varphi = 6\pi/32$.}\label{fig:bloque5_e5_3_histogramas}
+\end{figure}
+
+En la Figura~\ref{fig:bloque5_e5_3_histogramas} se muestran los histogramas obtenidos para cada una de las fases estimadas. 
+Para el caso $\varphi = 6\pi/32$ se mide de manera determinista que corresponde con la estimación
+$\tilde\varphi = 3/32$ con error $|\tilde\varphi - \theta| = 0$, es decir, 
+una estimación exacta puesto que $\theta = m/2^t = 3/2^5$. 
+
+Para el caso $\varphi = 4\pi/5$ el resultado no es determinista puesto que $\theta = 2/5$ no puede ser representado como 
+$\theta = m/2^t$. El estado más frecuente medido es $\ket{m} = \ket{01101} \equiv \ket{13}$, que corresponde a la estimación
+$\tilde\varphi = 13/32$ con error $|\tilde\varphi - \theta| = 0.00625$. El error ha mejorado $|\frac{0.1}{0.00625}| = 16$, es decir, 
+ha disminuido en un factor de $16$ al aumentar el número de qubits de conteo de $t=2$ a $t=5$.
+
+
+\subsection{Ejercicio E2.1. QPE con \texorpdfstring{$t = 3$}{t = 3} para \texorpdfstring{$U = P(2\pi/3)$}{U = P (2 pi/3)}}
+En este ejercicio se implementa el circuito de QPE para $t = 3$, tomando como autovector $\ket{\varphi} = \ket{1}$ del operador 
+\[
+U = P(2\pi/3) = \begin{pmatrix}
+    1 & 0\\
+    0 & e^{2\pi i/3}
+\end{pmatrix}
+\]
+
+\subsubsection{Apartado a. Construcción del circuito}
+El autovector $\ket{\varphi} = \ket{1}$ se prepara mediante una puerta $X$ qubit que hace de registro. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e2_1_circuit.png}
+    \caption{Circuito QPE implementado para el ejercicio E2.1.\ para $t = 3$ y $U = P(2\pi/3)$.}\label{fig:bloque5_e2_1}
+\end{figure}
+s
+En la Figura~\ref{fig:bloque5_e2_1} se muestra el circuito implementado mediante Qiskit para este ejercicio. 
+
+\subsubsection{Apartado b. Estados intermedios y distribución de probabilidad}
+En el \textbf{punto 1} del circuito tras aplicar las puertas Hadamard sobre el registro de conteo, el estado del sistema es:
+\begin{equation}
+    |\pi_1\rangle=|1\rangle\otimes\left( \frac{1}{\sqrt8}\sum_{k=0}^{7}|k\rangle \right)
+\end{equation}
+
+El estado calculado mediante $Statevector$ coincide con el estado teórico calculado: 
+\begin{align*}
+    &\frac{\sqrt{2}}{4} \ket{1000} + \frac{\sqrt{2}}{4} \ket{1001} + \frac{\sqrt{2}}{4} \ket{1010} + \frac{\sqrt{2}}{4} \ket{1011}+\\
+    &\frac{\sqrt{2}}{4} \ket{1100} + \frac{\sqrt{2}}{4} \ket{1101} + \frac{\sqrt{2}}{4} \ket{1110} + \frac{\sqrt{2}}{4} \ket{1111}\\
+\end{align*}
+
+En el \textbf{punto 2} del circuito tras aplicar las puertas $U$ controladas, el estado del sistema es:
+\begin{equation}
+    |\psi_2\rangle=|1\rangle\otimes \left(\frac{1}{\sqrt8}\sum_{k=0}^{7}e^{2\pi i k/3}\,|k\rangle\right)
+\end{equation}
+
+El estado calculado mediante $Statevector$ coincide con el estado teórico calculado: 
+\begin{align*}
+    &\frac{\sqrt{2}}{4} |1000\rangle+(-0.1768 + 0.3062 i) |1001\rangle+(-0.1768 - 0.3062 i) |1010\rangle+\\
+    &\frac{\sqrt{2}}{4} |1011\rangle+(-0.1768 + 0.3062 i) |1100\rangle+(-0.1768 - 0.3062 i) |1101\rangle+\\
+    &\frac{\sqrt{2}}{4} |1110\rangle+(-0.1768 + 0.3062 i) |1111\rangle
+\end{align*}
+
+En el \textbf{punto 3} del circuito tras aplicar la QFT inversa, el estado del sistema es:
+\begin{equation}
+    |\psi_3\rangle=\sum_{m=0}^{7}A(m)\,|m\rangle\otimes|1\rangle,\qquad A(m)=\frac18\sum_{k=0}^{7}e^{2\pi i k\left(\frac13-\frac m8\right)}
+\end{equation}
+
+El estado calculado mediante $Statevector$ coincide con el estado teórico calculado: 
+\begin{align*}
+    (0.0625 + 0.1082531755 i) |1000\rangle+(0.0232108575 + 0.1763039664 i) |1001\rangle+\\
+    (-0.1082531755 + 0.4040063509 i) |1010\rangle+(0.5048822514 - 0.6579753603 i) |1011\rangle+\\
+    (0.1875 - 0.1082531755 i) |1100\rangle+(0.1352827915 - 0.0178103174 i) |1101\rangle+\\
+    (0.1082531755 + 0.0290063509 i) |1110\rangle+(0.0866240995 + 0.0664690094 i) |1111\rangle\\
+\end{align*}
+
+En el punto 4 la probabilidad de medir $m$ es $P(m) = |A(m)|^2$. Como
+$\sin^2(8\pi\delta) = \sin^2(2\pi/3) = 3/4$ para todo $m$, con $\delta = \tfrac13 - \tfrac m8$,
+queda la expresión cerrada
+\begin{equation*}
+  P(m) = \frac{3}{256\,\sin^2\!\left(\dfrac{\pi\,(8-3m)}{24}\right)} .
+\end{equation*}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{@{}rccc@{}}
+    \toprule
+    $m$ & Cadena $(q_2 q_1 q_0)$ & $\tilde\varphi = m/8$ & $P(m)$ \\
+    \midrule
+    0 & \texttt{000} & 0,000 & 0,0156 \\
+    1 & \texttt{001} & 0,125 & 0,0316 \\
+    2 & \texttt{010} & 0,250 & 0,1749 \\
+    3 & \texttt{011} & 0,375 & \textbf{0,6878} \\
+    4 & \texttt{100} & 0,500 & 0,0469 \\
+    5 & \texttt{101} & 0,625 & 0,0186 \\
+    6 & \texttt{110} & 0,750 & 0,0126 \\
+    7 & \texttt{111} & 0,875 & 0,0119 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Distribución de probabilidad de la medida en QPE con $t=3$ y $\theta = 1/3$.}
+  \label{tab:e2_1_distribucion}
+\end{table}
+
+El resultado más probable es $m = 3$ (\texttt{011}), con probabilidad $\approx 68{,}8\%$, que
+da la fase estimada $\tilde\varphi = 3/8 = 0{,}375$ con error $|0{,}375 - 1/3| \approx 0{,}042$,
+inferior a la cota $2^{-(t+1)} = 0{,}0625$. El vecino $m = 2$ acumula $\approx 17{,}5\%$. La
+distribución no es determinista porque $\theta = 1/3$ no es diádica: $2^3\theta = 8/3$ cae a
+$1/3$ de marca de la más cercana.
+
+
+
+\subsubsection{Apartado c. Representación de histograma de las medidas}
+En este apartado se muestra el histograma obtenido tras la implementación del circuito de QPE para $t = 3$ y $U = P(2\pi/3)$, junto 
+a la distribución de probabilidad experimental respecto del histograma.
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e2_1_histograma.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e2_1_probdistribution.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Histograma del QPE para $t = 3$ que estima la fase del operador $U = P(2\pi/3)$.\\
+    (b): Distribución de probabildad del QPE para $t = 3$ que estima la fase del operador $U = P(2\pi/3)$.}
+    \label{fig:bloque5_e2_1_histograma}
+\end{figure}
+
+En la Figura~\ref{fig:bloque5_e2_1_histograma} se muestra el histograma obtenido tras la implementación del circuito de QPE para $t = 3$ y $U = P(2\pi/3)$, junto 
+a la distribución de probabilidad experimental respecto del histograma. Se puede observar que el histograma y la probabilidades experimentales 
+coinciden con lo obtenido en la distribución de probabilidad teórica mostrada en la Tabla~\ref{tab:e2_1_distribucion}.
+
+\subsubsection{Apartado d. Fase estimada}
+El resultado más frecuente es $m = 3$ (\texttt{011}), por lo que la fase estimada es $\tilde\varphi = 3/8 = 0{,}375$ mientras que
+la fase exacta es $\theta = 1/3 = 1/3$. El error absoluto es $|\tilde\varphi - \theta| \approx 0{,}042$, que es inferior a la cota $2^{-(t+1)} = 0{,}0625$. La probabilidad experimental 
+$P(3) \approx 0.696$.
+
+
+
+
+\subsection{Ejercicio E2.2. Mejora de la precisión}
+\subsubsection{Apartado a. Repetición del ejercicio E2.1 para tamaño creciente \texorpdfstring{$t$}{t}}
+Se ha implementado el circuito de QPE para $t = 4, 5, 6$. 
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e2_2_histogramat4.png}
+        \caption{}
+        \label{fig:bloque5_e2_2_histogramat4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e2_2_histogramat5.png}
+        \caption{}
+        \label{fig:bloque5_e2_2_histogramat5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e2_2_histogramat6.png}
+        \caption{}
+        \label{fig:bloque5_e2_2_histogramat6}
+    \end{subfigure}
+    \caption{Histogramas para creciente tamaños $t = 4, 5, 6$ para el QPE que estima la fase del operador $U = P(2\pi/3)$.}
+    \label{fig:bloque5_e2_2_histogramas}
+\end{figure}
+
+En la Figura~\ref{fig:bloque5_e2_2_histogramas} se muestran los histogramas obtenidos para cada uno de los tamaños $t = 4, 5, 6$ implementados. 
+Se observa que las medidas obtenidas son:
+\begin{itemize}
+    \item Para $t = 4$ el estado más frecuente medido es $\ket{m} = \ket{0101} \equiv 5$, que corresponde a la estimación
+    $\tilde\varphi = 5/16 = 0.3125$ con error $|\tilde\varphi - \theta| = 0.02083$.
+    \item Para $t = 5$ el estado más frecuente medido es $\ket{m} = \ket{01011} \equiv 11$, que corresponde a la estimación
+    $\tilde\varphi = 11/32 = 0.34375$ con error $|\tilde\varphi - \theta| = 0.01042$.
+    \item Para $t = 6$ el estado más frecuente medido es $\ket{m} = \ket{010101} \equiv 21$, que corresponde a la estimación
+    $\tilde\varphi = 21/64 = 0.328125$ con error $|\tilde\varphi - \theta| = 0.00521$.
+\end{itemize}
+
+\subsubsection{Apartado b. Tablas de resultados}
+En la Tabla~\ref{tab:bloque5_e2_2_resultados} se muestran los resultados obtenidos para cada uno de los tamaños $t = 4, 5, 6$ implementados. Los 
+datos mostrados son: resultado más probable, fase estimada, error absoluto y probabilidad experimental de medir el estado más frecuente.
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c c c c c c}
+        \toprule
+        $t$ & Estado medido $\ket{m}$ & $m$ & $\tilde\varphi$ & $|\tilde\varphi - \theta|$ & $P(m)$ \\
+        \midrule
+        4 & $\ket{0101}$   & 5  & $5/16 = 0.3125$     & $0.02083$ & $0.693359375$\\
+        5 & $\ket{01011}$  & 11 & $11/32 = 0.34375$   & $0.01042$ & $0.67724609375$\\
+        6 & $\ket{010101}$ & 21 & $21/64 = 0.328125$  & $0.00521$ & $0.69091796875$\\
+        \bottomrule
+    \end{tabular}
+    \caption{Tabla con la información de los resultados obtenidos para creciente tamaño $t$.}
+    \label{tab:bloque5_e2_2_resultados}
+\end{table}
+
+Por otro lado, se ha realizado el experimento para tamaños $t = 4, \dots, 15$ y se representado el error aboluto junto al error máximo para
+cada $t$. En la Figura~\ref{fig:bloque5_e2_2_grafico_errores} se muestra el gráfico obtenido del error aboluto y el error máximo para cada tamaño 
+$t$ implementado. Se observa que el error absoluto disminuye a medida que aumenta el tamaño $t$ y que la diferencia con el error máximo
+posible es siempre la misma.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{imagenes/bloque5/e2_2_grafico_errores.png}
+    \caption{Error absoluto y error máximo para tamaños $t = 4, \dots, 15$.}\label{fig:bloque5_e2_2_grafico_errores}
+\end{figure}
+
+
+
+
+\subsubsection{Apartado c. Determinar t para error dado}
+El menor $t$ que garantiza un error absoluto inferior a $0.01$ es para $t = 6$. En la Tabla~\ref{tab:bloque5_e2_2_resultados} 
+se observa que para $t = 6$ el error absoluto es $0.00521 < 0.01$.
+
+\noindent\textbf{¿Por qué la probabilidad del pico no tiende a 1?}
+
+\medskip
+\noindent\textit{1. Cuándo valdría exactamente 1.} Con $N = 2^t$, la probabilidad de medir $m$ es
+\begin{equation*}
+  P(m) = \frac{\sin^2(\pi N\delta)}{N^2\sin^2(\pi\delta)},
+  \qquad \delta = \varphi - \frac{m}{N}.
+\end{equation*}
+Vale $1$ solo si $\delta = 0$, es decir, si $\varphi = m/N$ para algún entero $m$, lo que exige
+que $\varphi$ tenga un desarrollo binario finito de $t$ bits. Pero
+$\varphi = 1/3 = 0{,}010101\ldots_2$ no termina nunca, así que ningún $t$ lo cumple y siempre
+queda $\delta \neq 0$.
+
+\medskip
+\noindent\textit{2. Posición de $\varphi$ respecto a las marcas.} Las estimaciones posibles son
+las marcas $m/N$. Medida en unidades de marca, $\varphi$ está en la posición $N\varphi = 2^t/3$.
+Como $2^t \bmod 3$ alterna entre $1$ y $2$, la parte decimal de $2^t/3$ es siempre $1/3$ o
+$2/3$ (Tabla~\ref{tab:marcas}): el mejor $m$ queda siempre a $\varepsilon = 1/3$ de marca,
+para cualquier $t$.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{@{}rccc@{}}
+    \toprule
+    $t$ & $2^t/3$ & Marca más cercana & Distancia $\varepsilon$ (en marcas) \\
+    \midrule
+    3 & 2,667  & 3  & $1/3$ \\
+    4 & 5,333  & 5  & $1/3$ \\
+    5 & 10,667 & 11 & $1/3$ \\
+    6 & 21,333 & 21 & $1/3$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Posición de $\varphi = 1/3$ respecto a la rejilla de estimaciones $m/2^t$.}
+  \label{tab:marcas}
+\end{table}
+
+\noindent\textit{3. Límite.} En fase real, $\delta = \varepsilon/N$, de modo que
+\begin{equation*}
+  P_{\max}(t) = \frac{\sin^2(\pi\varepsilon)}{N^2\sin^2(\pi\varepsilon/N)}.
+\end{equation*}
+Para $N$ grande, $\sin(\pi\varepsilon/N) \approx \pi\varepsilon/N$ y
+\begin{equation*}
+  P_{\max} \longrightarrow \left(\frac{\sin \pi\varepsilon}{\pi\varepsilon}\right)^{2}
+  = \frac{\sin^2(\pi/3)}{(\pi/3)^2} = \frac{27}{4\pi^2} \approx 0{,}684 .
+\end{equation*}
+En el resultado ya no aparece $t$, solo $\varepsilon$, y $\varepsilon$ no cambia. Los valores
+concretos son $0{,}688$ para $t=3$, $0{,}685$ para $t=4$ y $0{,}684$ desde $t=5$.
+
+\medskip
+\noindent\textit{4. Intuición.} Al aumentar $t$ el error absoluto baja
+($\delta = 1/(3\cdot 2^t)$), pero el pico también se estrecha: su anchura es $\approx 1/2^t$,
+una marca. Ambas escalan igual, así que $\varphi$ queda siempre a $1/3$ de la anchura del pico
+respecto a su centro. Como la distribución tiene forma de $\operatorname{sinc}^2$, evaluarla a
+$1/3$ de anchura del centro da siempre $0{,}684$.
+
+\medskip
+\noindent\textit{5. A dónde va el resto.} El $31{,}6\%$ restante se reparte entre las marcas
+vecinas. La más cercana por el otro lado está a $2/3$ de marca y recibe
+\begin{equation*}
+  \left(\frac{\sin(2\pi/3)}{2\pi/3}\right)^{2} \approx 0{,}171
+\end{equation*}
+(para $t=3$ se obtiene $0{,}175$). Entre las dos marcas vecinas suman $\approx 85{,}5\%$ y
+el resto ($\approx 14{,}5\%$) queda en las colas.
+
+\medskip
+\noindent\textit{6. Qué sí mejora.} La estimación sigue siendo buena: el pico y su vecino
+están a menos de $2^{-t}$ de $\varphi$. Para tener una confianza cercana a $1$ de que el error
+es pequeño hay que tomar un $t$ mayor que el estrictamente necesario y sumar la probabilidad de
+una ventana de marcas alrededor del pico. Lo que no aumenta es la probabilidad de un
+\emph{único} valor de $m$.
+
+
+
+\subsection{Ejercicio E2.3. Operador diagonal con dos fases}
+En este ejercicio se aplica la estimación de fase cuántica (QPE) al operador diagonal de un qubit
+\begin{equation*}
+  U = \operatorname{diag}\!\left(e^{2\pi i\varphi_0},\, e^{2\pi i\varphi_1}\right),
+  \qquad \varphi_0 = 0{,}275, \quad \varphi_1 = 0{,}375,
+\end{equation*}
+con las fases expresadas en fracciones de vuelta. Al ser $U$ diagonal, sus autovectores son los
+estados de la base computacional: $|0\rangle$, con autovalor $e^{2\pi i\varphi_0}$, y
+$|1\rangle$, con autovalor $e^{2\pi i\varphi_1}$. Para implementarlo en Qiskit se descompone como
+\begin{equation*}
+  U = R_z(-4\pi\varphi_0)\cdot P\big(2\pi(\varphi_0+\varphi_1)\big),
+\end{equation*}
+ya que $R_z(\alpha) = \operatorname{diag}(e^{-i\alpha/2}, e^{i\alpha/2})$, y se construye la
+versión controlada de $U^{k}$ que necesita el circuito, donde el qubit de conteo $j$ controla
+$U^{2^j}$.
+
+Se ha implementado el circuito de QPE para $t = 6$ para cada uno de los autovectores $|0\rangle$ y $|1\rangle$. 
+En la Figura~\ref{fig:bloque5_e2_3_histogramas} se muestran los histogramas obtenidos para cada uno de los autovectores implementados.
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e2_3_histograma_estado0.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.48\textwidth}
+        \includegraphics[width=0.9\textwidth]{imagenes/bloque5/e2_3_histograma_estado1.png}
+        \caption{}
+    \end{subfigure}
+    \caption{(a): Histograma del QPE del operador $U = 
+    \operatorname{diag}\!\left(e^{2\pi_i\varphi_0},\, e^{2\pi_i\varphi_1}\right)$ para el estado $\ket{0}$.\\
+    (b): Histograma del QPE del operador $U = 
+    \operatorname{diag}\!\left(e^{2\pi_i\varphi_0},\, e^{2\pi_i\varphi_1}\right)$ para el estado $\ket{1}$.}\label{fig:bloque5_e2_3_histogramas}
+\end{figure}
+
+\begin{itemize}
+    \item Estado $\ket{0}$: El estado más frecuente es $\ket{m} = \ket{010010} = \ket{18}$ por lo que la fase estimada es
+    $\tilde\varphi = 18/64$. El error absoluto sería $|\tilde\varphi - \varphi_0| = 0.00625$.
+    \item Estado $\ket{1}$: El estado más frecuente es $\ket{m} = \ket{011000} = \ket{24}$ por lo que la fase estimada es
+    $\tilde\varphi = 24/64 = 0.375$. El error absoluto sería $|\tilde\varphi - \varphi_1| = 0$.
+\end{itemize}
+
+Para el estado $\ket{1}$ es posible estimar la fase de manera determinista puesto que $\varphi_1$ se puede representar como
+$\varphi_1 = m/2^6 = 24/64$. En cambio, para el estado $\ket{0}$, $\varphi_0 = 11/40$ que no es posible ser calculado como
+$m/2^6$.  
+
+
+\subsection{Ejercicio E2.4. Combinación lineal de autovectores}
+En el siguiente ejercicio se procederá a estudiar el efecto de la 
+Estimación cuántica de fase (QPE) sobre un registro $\ket{\psi} = c_0\ket{\varphi_0} + c_1\ket{\varphi_1}$
+que es una superposición de los dos autovectores $\ket{\varphi_0}$ y $\ket{\varphi_1}$ de un operador unitario 
+$U$, que en nuestro caso $U = diag(e^{2\pi i \varphi_0}, e^{2\pi i \varphi_1})$ 
+con $\varphi_0 = 0.275$ y $\varphi_1 = 0.375$. 
+
+Sabemos que $\ket{\varphi_0} = \ket{0}$ y $\ket{\varphi_1} = \ket{1}$, 
+donde $U^k|0\rangle=e^{2\pi i k\varphi_0}|0\rangle$, $U^k|1\rangle=e^{2\pi i k\varphi_1}|1\rangle$. 
+Por lo tanto en el punto 2 del circuit QPE, tras aplicar las $U$ controladas sería:
+\begin{equation}
+\frac{1}{\sqrt N}\sum_k|k\rangle\otimes\Big(c_0e^{2\pi i k\varphi_0}|0\rangle+c_1e^{2\pi i k\varphi_1}|1\rangle\Big)=c_0|\Phi_0\rangle|0\rangle+c_1|\Phi_1\rangle|1\rangle
+\end{equation}
+con 
+\[|\Phi_a\rangle=\frac{1}{\sqrt N}\sum_k e^{2\pi i k\varphi_a}|k\rangle .\]
+
+Tras aplicar $QFT^{\dagger}$
+\begin{equation}
+\text{QFT}^\dagger|\Phi_a\rangle=\sum_m A_a(m)\,|m\rangle,\qquad A_a(m)=\frac1N\sum_{k=0}^{N-1}e^{2\pi i k(\varphi_a-m/N)}
+\end{equation}
+
+Entonces, el estado final es un estado entrelazado de la forma:
+\begin{equation}
+\ket{\pi_f} = \sum_m A_0(m)\,|m\rangle\otimes c_0|0\rangle+\sum_m A_1(m)\,|m\rangle\otimes c_1|1\rangle
+\end{equation}
+
+La probabilidad de medir el $m$ en el registro de conteo es:
+\begin{equation}
+\label{eq:prob_m}
+P(m)=\big\|c_0A_0(m)|0\rangle+c_1A_1(m)|1\rangle\big\|^2=|c_0|^2|A_0(m)|^2+|c_1|^2|A_1(m)|^2
+\end{equation}
+
+
+
+\subsubsection{Apartado a. Elección de coeficientes normalizados}
+
+Para la experimentación se han preparado los estados $\ket{\psi}$ con los siguientes coeficientes normalizados:
+\begin{itemize}
+    \item $|c_0|^2 = 0.8$ y $|c_1|^2 = 0.2$
+    \item  $|c_0|^2 = 0.3$ y $|c_1|^2 = 0.7$
+\end{itemize}
+
+Los estados correspondientes se consiguen mediante la puerta $R_Y(\theta)$ que actúa como
+$R_Y(\theta)\ket{0} = \cos(\theta/2)\ket{0} + \sin(\theta/2)\ket{1}$, para unos pesos $|c_0|^2 = p_0$ basta con
+\[\theta = 2\arccos\sqrt{p_0}\]
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e2_4_histograma_c0_80perc.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{imagenes/bloque5/e2_4_histograma_c0_30perc.png}
+        \caption{}
+    \end{subfigure}
+    \caption{\textbf{(a)} Histograma para el estado $\ket{\psi}$ con $|c_0|^2 = 0.8$ y $|c_1|^2 = 0.2$.\\
+    \textbf{(b)} Histograma para el estado $\ket{\psi}$ con $|c_0|^2 = 0.3$ y $|c_1|^2 = 0.7$.}
+    \label{fig:bloque5_e2_4_histogramas}
+\end{figure}
+
+En las Figura~\ref{fig:bloque5_e2_4_histogramas} se muestran los histogramas obtenidos para cada uno de los estados $\ket{\psi}$ preparados.
+Antes del análisis del Apartado b de este ejercicio, se puede observar en ambos histogramas que 
+los $m$ más frecuentes son aquellos que se encuentran cuando implementamos QPE sobre los autovectores $\ket{0}$ y $\ket{1}$.
+
+
+
+\subsubsection{Apartado b. Deducción de fases en función de histogramas}
+En cada histograma aparecen dos grupos de picos. El primero se centra en $m = 18$, que
+corresponde a la fase estimada $\tilde\varphi_0 = 18/2^6 \approx 0{,}281$, próxima al valor
+exacto $\varphi_0 = 0{,}275$ (error $0{,}006 < 2^{-7}$). El segundo es un único pico en
+$m = 24$, con $\tilde\varphi_1 = 24/2^6 = 0{,}375 = \varphi_1$, exacta porque $2^6\varphi_1$
+es entero. Según la Expresión~\eqref{eq:prob_m}, los coeficientes no desplazan los picos,
+solo escalan su altura: cada grupo pesa $|c_a|^2$ veces la distribución que daría la QPE
+sobre el autovector correspondiente.
+
+\textbf{Caso $\mathbf{|c_0|^2 = 0.8}$ y $\mathbf{|c_1|^2 = 0.2}$}: Para $m = 24$ tenemos que $P(24) = 0.8|A_0(24)|^2 + 0.2$ (Sabemos del ejercicio anterior 
+$|A_1(24)|^2 = 1$) y para $m = 18$ tenemos que $P(18) = 0.8|A_0(18)|^2 + 0.2*0$ (Sabemos del ejercicio anterior 
+$|A_1(18)|^2 = 0$). 
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{@{}rccc@{}}
+    \toprule
+    $m$ & Observado & Predicción\\
+    \midrule
+    18 & 0,464 & 0,458\\
+    24 & 0,201 & 0,202\\
+    \bottomrule
+  \end{tabular}
+  \label{tab:bloque5_e2_4_c0_80perc}
+\end{table}
+
+\textbf{Caso $\mathbf{|c_0|^2 = 0.3}$ y $\mathbf{|c_1|^2 = 0.7}$}: Para $m = 24$ tenemos que $P(24) = 0.3|A_0(24)|^2 + 0.7$ (Sabemos del ejercicio anterior 
+$|A_1(24)|^2 = 1$) y para $m = 18$ tenemos que $P(18) = 0.3|A_0(18)|^2 + 0.7*0$ (Sabemos del ejercicio anterior 
+$|A_1(18)|^2 = 0$). 
+\begin{table}[h]
+  \centering
+  \begin{tabular}{@{}rccc@{}}
+    \toprule
+    $m$ & Observado & Predicción \\
+    \midrule
+    18 & 0.161 & 0.172\\
+    24 & 0.709 & 0.701\\
+    \bottomrule
+  \end{tabular}
+  \label{tab:bloque5_e2_4_c0_30perc}
+\end{table}
+
+En ambas tablas las probabilidades observadas coinciden con las predichas dentro de la
+fluctuación estadística. Esto confirma que la QPE sobre una combinación lineal de autovectores
+estima la fase de cada uno con una probabilidad igual al producto de su peso $|c_a|^2$ por
+la probabilidad de la QPE sobre ese autovector.
+
+\subsubsection{Apartado c. Estado del registro \texorpdfstring{$\ket{\psi}$}{psi}}
+Tras la QFT inversa el estado completo es
+\begin{equation*}
+  \sum_m |m\rangle \otimes \big( c_0 A_0(m)\,|0\rangle + c_1 A_1(m)\,|1\rangle \big),
+\end{equation*}
+de modo que, al medir el registro de conteo y obtener $m$, el qubit $|\psi\rangle$
+\emph{colapsa} al estado que acompaña a ese $m$ y se pierde la superposición original.
+Con $t=6$:
+\begin{itemize}
+  \item $m \neq 24$ (17, 18, 19, \dots): $A_1(m) = 0$, porque $\varphi_1$ es diádica, y el
+        qubit queda en $|0\rangle$ \textbf{con certeza}.
+  \item $m = 24$: el qubit queda en $|1\rangle$ \textbf{casi con certeza}. Solo permanece
+        una pequeña componente de $|0\rangle$, porque la cola de $\varphi_0$ también puede
+        dar $m=24$ ($|A_0(24)|^2 \approx 0{,}0023$), que pesa $\approx 0{,}9$ para
+        $|c_0|^2 = 0{,}8$ y $\approx 0{,}1$ para $|c_0|^2 = 0{,}3$.
+\end{itemize}
+Medir el registro de conteo equivale, por tanto, a una medida de $U$: proyecta
+$|\psi\rangle$ sobre sus autovectores y los coeficientes $c_0$ y $c_1$ solo fijan la
+probabilidad de cada resultado. Al medir también $|\psi\rangle$, todos los disparos con
+$m \neq 24$ dan $|0\rangle$ y casi todos los de $m = 24$ dan $|1\rangle$, lo que confirma
+el razonamiento.
