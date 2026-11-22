@@ -1,1 +1,719 @@
 \section{Apéndice}\label{sec:apendice}
+
+Este apéndice recoge las partes significativas del código del cuaderno, ordenadas por bloque: las funciones auxiliares, la construcción de los oráculos y de los circuitos de cada algoritmo,
+y las comprobaciones que contrastan la simulación con la teoría. Para no repetir código se muestra un caso representativo cuando varios ejercicios usan el mismo patrón
+(por ejemplo, solo la clave $a=1010$ de Bernstein-Vazirani), y se han omitido las instrucciones de dibujo y de impresión por pantalla (\texttt{display}, \texttt{draw}, \texttt{plot\_histogram}, \texttt{print} de tablas).
+El cuaderno completo reproduce todas las figuras y tablas de la memoria; los listados siguen la convención \textit{little-endian} de Qiskit, salvo donde se indica lo contrario en cada bloque.
+
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape,
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=6pt,
+    xleftmargin=1.6em,
+    frame=single,
+    framesep=3pt,
+    breaklines=true,
+    breakindent=1.5em,
+    postbreak=\mbox{$\hookrightarrow$\space},
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    aboveskip=1.2ex,
+    belowskip=1.2ex,
+    literate=
+        {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
+        {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1 {Ñ}{{\~N}}1
+        {¿}{{?`}}1 {¡}{{!`}}1 {·}{{$\cdot$}}1 {θ}{{$\theta$}}1 {π}{{$\pi$}}1,
+}
+\renewcommand{\lstlistingname}{Código}
+
+\subsection{Configuración común}
+
+Parámetros globales y función de simulación usados en todos los bloques. La semilla se fija en el simulador (\texttt{seed\_simulator}), tanto en el constructor como en cada ejecución, porque es la única que controla el muestreo de Aer.
+
+\begin{lstlisting}[caption={Importaciones principales, semilla, número de disparos, simulador y función de simulación (todos los bloques).},label={lst:config}]
+from qiskit import QuantumRegister, QuantumCircuit, generate_preset_pass_manager
+from qiskit import transpile
+from qiskit_aer import AerSimulator
+from qiskit.circuit.library import *
+from qiskit.circuit import Gate
+import numpy as np
+from qiskit.quantum_info import Statevector, Pauli, Operator
+from tabulate import tabulate
+import matplotlib.pyplot as plt
+from scipy.stats import chisquare, chi2
+
+seed = 98
+shots = 4096
+np.random.seed(seed)
+random.seed(seed)
+sim = AerSimulator(seed_simulator=seed)  
+RESULTS = {'tables': {}, 'figures': {}, 'metrics': {}}
+
+def simular(qc, n_shots=shots, memory=False):
+    """Ejecuta qc en AerSimulator (semilla fija). Devuelve los counts y, si memory=True,
+    también la lista de resultados disparo a disparo."""
+    res = sim.run(transpile(qc, sim), shots=n_shots, memory=memory, seed_simulator=seed).result()
+    if memory:
+        return res.get_counts(), res.get_memory()
+    return res.get_counts()
+\end{lstlisting}
+
+\subsection{Bloque 1: oráculos booleanos reversibles}
+
+El oráculo $U_f|x\rangle|y\rangle=|x\rangle|y\oplus f(x)\rangle$ se construye a partir de la tabla de verdad con una \texttt{MCXGate} por cada fila con salida $1$; las funciones AND, XOR y lineal se implementan directamente con Toffoli y CNOT.
+
+\begin{lstlisting}[caption={Construcción de oráculos por minitérminos y casos particulares (ejercicios 1.1, 1.3, 1.4 y 1.6).},label={lst:b1_oraculos}]
+def oraculo_booleano(tabla, nombre_in='x', nombre_out='y'):
+    """Oráculo U_f|x>|y> = |x>|y XOR f(x)> para una tabla {'x_{n-1}..x_0': 'f_{m-1}..f_0'}.
+    Entrada x_j en el qubit j; el bit f_j se suma al qubit n+j.
+    Se añade una MCXGate por cada entrada x y por cada bit de salida f_j = 1; los controles
+    actúan sobre |1> o sobre |0> según los bits de x (ctrl_state = x)."""
+    n_in = len(next(iter(tabla)))
+    n_out = len(next(iter(tabla.values())))
+    entrada = QuantumRegister(n_in, nombre_in)
+    salida = QuantumRegister(n_out, nombre_out)
+    qc = QuantumCircuit(entrada, salida, name='U_f')
+    for x, fx in tabla.items():
+        for j, bit in enumerate(fx[::-1]):            # bit f_j de la salida
+            if bit == '1':
+                qc.append(MCXGate(n_in, ctrl_state=x), list(entrada) + [salida[j]])
+    return qc
+
+# Oráculo: Toffoli con controles q0 (a0), q1 (a1) y objetivo q2 (ancilla y)
+tabla_and = {'00': '0', '01': '0', '10': '0', '11': '1'}     # a1a0 -> a1 AND a0
+
+oraculo_and = QuantumCircuit(3, name='U_AND')
+oraculo_and.ccx(0, 1, 2)
+
+tabla_xor = {'00': '0', '01': '1', '10': '1', '11': '0'}     # a1a0 -> a1 XOR a0
+
+oraculo_xor = QuantumCircuit(3, name='U_XOR')
+oraculo_xor.cx(0, 2)
+oraculo_xor.cx(1, 2)
+
+def oraculo_con_X(tabla):
+    n_in = len(next(iter(tabla)))
+    qc = QuantumCircuit(n_in + 1, name='U_f (con X)')
+    for x, fx in tabla.items():
+        if fx == '1':
+            ceros = [j for j, b in enumerate(x[::-1]) if b == '0']
+            if ceros:
+                qc.x(ceros)
+            qc.mcx(list(range(n_in)), n_in)
+            if ceros:
+                qc.x(ceros)
+            qc.barrier()
+    return qc
+
+def oraculo_lineal(a, nombre_in='x', nombre_out='y'):
+    """Oráculo de f(x) = a·x (mod 2). a = 'a_{n-1}...a_0'; el bit a_i controla un CNOT desde q_i a la ancilla."""
+    n = len(a)
+    entrada = QuantumRegister(n, nombre_in)
+    salida = QuantumRegister(1, nombre_out)
+    qc = QuantumCircuit(entrada, salida, name=f'U_f (a={a})')
+    for i, bit in enumerate(a[::-1]):
+        if bit == '1':
+            qc.cx(entrada[i], salida[0])
+    return qc
+
+def tabla_lineal(a):
+    """Tabla de verdad teórica de f(x) = a·x (mod 2): paridad de los bits de a AND x."""
+    n = len(a)
+    return {format(x, f'0{n}b'): str(bin(x & int(a, 2)).count('1') % 2) for x in range(2 ** n)}
+\end{lstlisting}
+
+La verificación prepara cada entrada con puertas $X$, aplica el oráculo, mide todos los qubits y compara con la tabla teórica; además se comprueba que la matriz del circuito es la permutación teórica y que $U_f^2=I$.
+
+\begin{lstlisting}[caption={Verificación del oráculo con entradas clásicas y comprobación matricial.},label={lst:b1_verificacion}]
+def circuito_entrada_clasica(oraculo, x):
+    """Prepara |x> con puertas X, aplica el oráculo y mide todos los qubits."""
+    n = oraculo.num_qubits
+    qc = QuantumCircuit(n, n)
+    for j, bit in enumerate(x[::-1]):                 # x_j en el qubit j
+        if bit == '1':
+            qc.x(j)
+    qc.barrier()
+    qc.compose(oraculo, range(n), inplace=True)
+    qc.barrier()
+    qc.measure(range(n), range(n))
+    return qc
+
+def verificar_oraculo(oraculo, tabla, etiqueta='x'):
+    """Simula el oráculo para cada entrada clásica y compara con la tabla teórica.
+    La cadena medida es 'f_{m-1}..f_0 x_{n-1}..x_0'."""
+    n_out = len(next(iter(tabla.values())))
+    filas, todo_ok = [], True
+    for x, fx in tabla.items():
+        counts = simular(circuito_entrada_clasica(oraculo, x))
+        medido = max(counts, key=counts.get)
+        salida, entrada = medido[:n_out], medido[n_out:]
+        ok = (salida == fx) and (entrada == x) and (len(counts) == 1)
+        todo_ok &= ok
+        filas.append([x, fx, salida, entrada, counts[medido] / shots, 'OK' if ok else 'ERROR'])
+    cabecera = [etiqueta, 'f(x) teórica', 'f(x) simulada', 'x tras U_f', 'Probabilidad', 'Estado']
+    print(tabulate(filas, headers=cabecera, tablefmt='github'))
+    print(f'\n{sum(f[-1] == "OK" for f in filas)}/{len(filas)} entradas correctas'
+          f' -> {"el oráculo es correcto" if todo_ok else "HAY ERRORES"}')
+    return filas
+
+def matriz_oraculo_teorica(tabla):
+    """Matriz (permutación) de |x>|y> -> |x>|y XOR f(x)> con el orden de bits de Qiskit."""
+    n_in = len(next(iter(tabla)))
+    n_out = len(next(iter(tabla.values())))
+    dim = 2 ** (n_in + n_out)
+    U = np.zeros((dim, dim))
+    for x, fx in tabla.items():
+        for y in range(2 ** n_out):
+            columna = (y << n_in) | int(x, 2)
+            fila = ((y ^ int(fx, 2)) << n_in) | int(x, 2)
+            U[fila, columna] = 1
+    return U
+
+def comprobar_matriz(oraculo, tabla):
+    """Comprueba que la matriz del circuito es la de U_f y que U_f^2 = I."""
+    U = Operator(oraculo).data
+    print('Matriz del circuito = matriz teórica de U_f :', np.allclose(U, matriz_oraculo_teorica(tabla)))
+    print('U_f es su propio inverso (U_f^2 = I)         :', np.allclose(U @ U, np.eye(U.shape[0])))
+\end{lstlisting}
+
+Para el paralelismo cuántico (ejercicios 1.2 y 1.3) se aplican $H$ a las entradas antes del oráculo. El experimento de un solo disparo usa una semilla distinta en cada ejecución y cuenta los disparos necesarios para ver las cuatro filas.
+
+\begin{lstlisting}[caption={Entrada en superposición y experimento de disparos (ejercicios 1.2 y 1.3).},label={lst:b1_superposicion}]
+def circuito_superposicion(oraculo, n_in, medir=True):
+    """H en los n_in qubits de entrada, oráculo y (opcionalmente) medida de todos los qubits."""
+    n = oraculo.num_qubits
+    qc = QuantumCircuit(n, n) if medir else QuantumCircuit(n)
+    qc.h(range(n_in))
+    qc.barrier()
+    qc.compose(oraculo, range(n), inplace=True)
+    if medir:
+        qc.barrier()
+        qc.measure(range(n), range(n))
+    return qc
+
+def probs_teoricas(tabla):
+    """Predicción analítica: todas las filas (f(x), x) equiprobables. Clave = 'f x'."""
+    return {fx + x: 1 / len(tabla) for x, fx in tabla.items()}
+
+def disparos_hasta_tabla_completa(memoria, n_filas):
+    """Con la memoria disparo a disparo, cuenta cuántos disparos consecutivos hacen falta
+    para haber visto las n_filas salidas distintas (se reinicia al completarlas)."""
+    longitudes, vistos, n = [], set(), 0
+    for m in memoria:
+        n += 1
+        vistos.add(m)
+        if len(vistos) == n_filas:
+            longitudes.append(n)
+            vistos, n = set(), 0
+    return longitudes
+
+qc_t = transpile(qc_sup_and, sim)
+unico = [next(iter(sim.run(qc_t, shots=1, seed_simulator=1000 + s).result().get_counts())) for s in range(10)]
+_, mem = simular(qc_sup_and, n_shots=40, memory=True)
+_, mem_largo = simular(qc_sup_and, n_shots=50000, memory=True)
+longitudes = disparos_hasta_tabla_completa(mem_largo, len(tabla_and))
+
+_, memoria = simular(qc_sup_and, n_shots=shots, memory=True)
+longitudes = disparos_hasta_tabla_completa(memoria, n_filas)
+teoria = n_filas * sum(1 / k for k in range(1, n_filas + 1))
+\end{lstlisting}
+
+\subsection{Bloque 2: retroceso de fase}
+
+Todos los ejercicios de este bloque aplican las puertas una a una y guardan el \texttt{Statevector} tras cada paso. El vector de Bloch de un qubit se calcula con los valores esperados de $X$, $Y$ y $Z$, lo que vale también para qubits entrelazados.
+
+\begin{lstlisting}[caption={Evolución paso a paso, vector de Bloch y probabilidad de medir $q_0=1$.},label={lst:b2_utilidades}]
+def evolucion(n, pasos):
+    """Aplica uno a uno los pasos (etiqueta, funcion(qc)) a un circuito de n qubits sin medidas
+    y guarda el Statevector tras cada uno. Devuelve (circuito, [(etiqueta, Statevector)])."""
+    qc = QuantumCircuit(n)
+    salida = [('Estado inicial', Statevector(qc))]
+    for etiqueta, fn in pasos:
+        fn(qc)
+        salida.append((etiqueta, Statevector(qc)))
+    return qc, salida
+
+def vector_bloch(psi, qubit):
+    """(<X>, <Y>, <Z>) del qubit indicado (vale también para qubits entrelazados)."""
+    return tuple(float(np.real(psi.expectation_value(Pauli(p), [qubit]))) for p in 'XYZ')
+
+def prob_q0_uno(counts):
+    """P(q0 = 1) a partir de counts con cadena 'c1c0' (el bit de la derecha es q0)."""
+    return sum(v for k, v in counts.items() if k[-1] == '1') / sum(counts.values())
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 2.1: $CP(\pi/4)$ con comprobación del cálculo a mano y caso sin control.},label={lst:b2_cp}]
+s = 1 / np.sqrt(2)
+pasos_21 = [('Tras H(q0)', lambda qc: qc.h(0)),
+            ('Tras X(q1)', lambda qc: qc.x(1)),
+            ('Tras CP(pi/4), control q0 y objetivo q1', lambda qc: qc.cp(np.pi / 4, 0, 1))]
+qc_21, est_21 = evolucion(2, pasos_21)
+# Estados calculados a mano, en el orden [|00>, |01>, |10>, |11>] = |q1 q0>
+a_mano_21 = [np.array([1, 0, 0, 0]),
+             np.array([s, s, 0, 0]),
+             np.array([0, 0, s, s]),
+             np.array([0, 0, s, s * np.exp(1j * np.pi / 4)])]
+for (etiqueta, psi), v in zip(est_21, a_mano_21):
+    print(f'{etiqueta:42s} coincide con el cálculo a mano: {np.allclose(psi.data, v)}')
+
+pasos_21c = [('Tras H(q0)', lambda qc: qc.h(0)),
+             ('Tras X(q1)', lambda qc: qc.x(1)),
+             ('Tras P(pi/4) sobre q1 (sin control)', lambda qc: qc.p(np.pi / 4, 1))]
+qc_21c, est_21c = evolucion(2, pasos_21c)
+antes, despues = est_21c[2][1], est_21c[3][1]
+i = np.argmax(np.abs(antes.data))
+print('Factor entre el estado de después y el de antes de P(π/4):', np.round(despues.data[i] / antes.data[i], 4),
+      f'  (= e^(iπ/4) = {np.round(np.exp(1j*np.pi/4), 4)})')
+print('¿Mismo estado salvo fase global (Statevector.equiv)?      :', despues.equiv(antes))
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 2.2: pasos del circuito con CNOT o con $X$ sobre $q_1$.},label={lst:b2_cnot}]
+def pasos_22(q1_menos, puerta):
+    def preparar(qc):
+        qc.h(0)
+        if q1_menos:
+            qc.x(1)
+        qc.h(1)
+    def compuerta(qc):
+        if puerta == 'cx':
+            qc.cx(0, 1)
+        else:
+            qc.x(1)
+    def volver(qc):
+        qc.h([0, 1])
+    nombre_q1 = '|->' if q1_menos else '|+>'
+    nombre_p = 'CNOT(q0->q1)' if puerta == 'cx' else 'X(q1)'
+    return [(f'Tras preparar q0=|+>, q1={nombre_q1}', preparar),
+            (f'Tras {nombre_p}', compuerta),
+            ('Tras H en q0 y q1', volver)]
+
+final_mano_22 = {('cx', False): [1, 0, 0, 0],      # |00>
+                 ('cx', True):  [0, 0, 0, 1],      # |11>
+                 ('x',  False): [1, 0, 0, 0],      # |00>
+                 ('x',  True):  [0, 0, -1, 0]}     # -|10>  (q1=1, q0=0, signo global)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicios 2.3 y 2.4: pasos con $CP(\theta)$, barrido de $\theta$ y comprobación de $CP(\theta)^k=CP(k\theta)$.},label={lst:b2_barrido}]
+def pasos_cp(theta):
+    return [('(1) Tras X(q1): psi', lambda qc: qc.x(1)),
+            ("(2) Tras H(q0): psi'", lambda qc: qc.h(0)),
+            ("(3) Tras CP(θ): psi''", lambda qc: qc.cp(theta, 0, 1)),
+            ("(4) Tras H(q0): psi'''", lambda qc: qc.h(0))]
+
+def circuito_cp_medido(qc_sin_medidas):
+    qc = QuantumCircuit(2, 2)
+    qc.compose(qc_sin_medidas, inplace=True)
+    qc.measure([0, 1], [0, 1])
+    return qc
+
+ks = np.arange(1, 8)
+filas_24, bloch3, bloch4, p1_sim_24 = [], [], [], []
+for k in ks:
+    theta = k * np.pi / 4
+    qc_, est_ = evolucion(2, pasos_cp(theta))
+    v3, v4 = vector_bloch(est_[3][1], 0), vector_bloch(est_[4][1], 0)
+    bloch3.append(v3); bloch4.append(v4)
+    p1 = prob_q0_uno(simular(circuito_cp_medido(qc_)))
+    p1_sim_24.append(p1)
+    ok3 = np.allclose(v3, (np.cos(theta), np.sin(theta), 0))
+    ok4 = np.allclose(v4, (0, -np.sin(theta), np.cos(theta)))
+
+# Dos CP(pi/2) encadenadas frente a una CP(pi)
+doble = QuantumCircuit(2); doble.cp(np.pi / 2, 0, 1); doble.cp(np.pi / 2, 0, 1)
+unica = QuantumCircuit(2); unica.cp(np.pi, 0, 1)
+print('Operator(CP(π/2) · CP(π/2)) == Operator(CP(π)):', Operator(doble).equiv(Operator(unica)))
+ok = all(np.allclose(np.linalg.matrix_power(Operator(CPhaseGate(th)).data, kk), Operator(CPhaseGate(kk * th)).data)
+         for th in np.linspace(0.1, 3, 8) for kk in range(1, 9))
+print('CP(θ)^k = CP(kθ) para 8 valores de θ y k = 1..8:', ok)
+
+qc_c = QuantumCircuit(2, 2); qc_c.x(1); qc_c.h(0)
+qc_c.cp(np.pi / 2, 0, 1); qc_c.cp(np.pi / 2, 0, 1)
+qc_c.h(0); qc_c.measure([0, 1], [0, 1])
+print('P(q0=1) con dos CP(π/2):', prob_q0_uno(simular(qc_c)), '(teoría sin^2(π/2) = 1)')
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 2.5: oráculo $f(x)=x$ y cálculo de los autovalores $\lambda=\langle\psi_{in}|\psi_{out}\rangle$.},label={lst:b2_oraculo}]
+uf_25 = QuantumCircuit(2, name='U_f')      # q0 = x (dato), q1 = y (ancilla)
+uf_25.cx(0, 1)
+
+filas_25b = []
+for x in (0, 1):
+    for a in ('+', '-'):
+        psi_in = Statevector.from_label(a + str(x))          # etiqueta = 'q1 q0' = 'ancilla dato'
+        psi_out = psi_in.evolve(uf_25)
+        lam = psi_in.inner(psi_out)                          # <psi_in|psi_out>
+        es_autovector = np.allclose(psi_out.data, lam * psi_in.data)
+        lam_teo = 1 if a == '+' else (-1) ** x
+        filas_25b.append([f'|{x}>|{a}>', f'{lam.real:+.3f}{lam.imag:+.3f}j', lam_teo, es_autovector,
+                          'OK' if (es_autovector and np.isclose(lam, lam_teo)) else 'ERROR'])
+
+# Retroceso de fase: con el dato en |+> y la ancilla en |->, U_f lleva el dato a |->
+psi_in = Statevector.from_label('-+')
+psi_out = psi_in.evolve(uf_25)
+print('\nU_f |+>|->  ==  |->|->  :', psi_out.equiv(Statevector.from_label('--')))
+\end{lstlisting}
+
+\subsection{Bloque 3: Deutsch, Deutsch-Jozsa y Bernstein-Vazirani}
+
+En los tres algoritmos la ancilla se prepara en $|1\rangle$ y se aplican $H$ a todos los qubits antes y después del oráculo. En el ejercicio 3.3 y en el ejercicio E1 se invierte la asignación de bits clásicos en la medida (véase la sección «\nameref{sec:entorno_convenciones}»).
+
+\begin{lstlisting}[caption={Ejercicio 3.1: oráculos de una variable y circuito de Deutsch.},label={lst:b3_deutsch}]
+def oraculo(qc, tipo):
+    if tipo == "a":          # f(x) = 0 -> identidad
+        pass
+    elif tipo == "b":        # f(x) = 1 -> X sobre la ancilla
+        qc.x(1)
+    elif tipo == "c":        # f(x) = x -> CNOT
+        qc.cx(0, 1)
+    elif tipo == "d":        # f(x) = NOT x -> CNOT + X
+        qc.cx(0, 1)
+        qc.x(1)
+
+def deutsch(tipo):
+    qc = QuantumCircuit(2, 1)
+    qc.x(1)                  # ancilla en |1>
+    qc.h([0, 1])
+    qc.barrier()
+    oraculo(qc, tipo)
+    qc.barrier()
+    qc.h(0)
+    qc.measure(0, 0)
+    return qc
+
+deutsch_qcs = {}
+for t in "abcd":
+    qc = deutsch(t)
+    deutsch_qcs[t] = qc
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 3.2: oráculos de dos variables y circuito de Deutsch-Jozsa.},label={lst:b3_dj}]
+def oraculos3_2(tipo):
+    qc = QuantumCircuit(3, name = f'oraculo {tipo}')
+    if tipo == "a":
+        pass
+    elif tipo == "b":
+        qc.cx(0, 2)
+        qc.cx(1, 2)
+    else: #apartado c)
+        qc.ccx(0, 1, 2)
+    return qc.to_gate()
+
+def deutsch_jozsa(oraculo, n = 2):
+    qc = QuantumCircuit(n + 1, n)
+    qc.x(n)
+    qc.h(range(n + 1))
+    
+    qc.append(oraculo, range(n + 1))
+    qc.h(range(n + 1))
+    qc.measure(range(n), range(n))
+    return qc
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 3.3: Bernstein-Vazirani con clave $a=1010$ y medida con el orden de bits invertido.},label={lst:b3_bv}]
+#Construyo oraculo para clave oculta a = 1010
+oraculo_a1 = QuantumCircuit(5, name = "oraculo_a1")
+oraculo_a1.cx(0, 4)
+oraculo_a1.cx(2, 4)
+oraculoa1_gate = oraculo_a1.to_gate()
+
+bvazirani_a1 = QuantumCircuit(5, 4, name = "circuito_bernstein_vazirani")
+bvazirani_a1.x(4)
+bvazirani_a1.h(range(5))
+bvazirani_a1.barrier()
+bvazirani_a1.append(oraculoa1_gate, range(5))
+bvazirani_a1.barrier()
+bvazirani_a1.h(range(5))
+bvazirani_a1.measure(range(4), range(3, -1, -1)) #Invierto los bits de medida
+bvazirani_a1.measure(range(4), range(3, -1, -1)) #Invierto los bits de medida
+counts = sim.run(transpile(bvazirani_a1, sim), shots=1).result().get_counts()
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio E1: oráculo dado, circuito de Deutsch-Jozsa y tabla de verdad de $f$.},label={lst:b3_e1}]
+# Construyo el oraculo
+dj_f = QuantumCircuit(3, name = "DJ_F")
+dj_f.x([0, 1])
+dj_f.ccx(0, 1, 2)
+dj_f.x([0, 1])
+
+dj_f.x(1)
+dj_f.ccx(0, 1, 2)
+dj_f.x(1)
+
+# Implemento el circuito
+e1dj = QuantumCircuit(3, 2)
+e1dj.x(2)
+e1dj.h([0, 1, 2])
+e1dj.append(oraculo_djf, [0, 1, 2])
+e1dj.h([0, 1])
+
+e1dj.measure([0, 1], [1, 0])
+
+counts = sim.run(transpile(e1dj, sim), shots = shots).result().get_counts()
+
+def init_circuit (qc, valor):
+    if valor == 0:
+        pass
+    elif valor == 1:
+        qc.x(1)
+    elif valor == 2:
+        qc.x(0)
+    else:
+        qc.x([0, 1])
+
+for i in range(4):
+    qc = QuantumCircuit(3, 1)
+    init_circuit(qc, i)
+    qc.append(oraculo_djf, [0, 1, 2])
+    qc.measure(2, 0)
+
+    counts = sim.run(transpile(qc, sim), shots = shots).result().get_counts()
+\end{lstlisting}
+
+\subsection{Bloque 4: algoritmo de Grover}
+
+El oráculo de fase se construye con una $Z$ multicontrolada ($H\cdot\mathrm{MCX}\cdot H$) rodeada de puertas $X$ en los qubits donde $w$ tiene un $0$. El circuito de difusión produce $-D$, por lo que se le añade una fase global $\pi$.
+
+\begin{lstlisting}[caption={Oráculo de fase, operador de difusión, circuito de Grover y probabilidad teórica $P_k$.},label={lst:b4_grover}]
+# Convenio: w = 'x_{n-1}...x_0' con x_j en el qubit q_j (Qiskit, little-endian).
+# El estado |w> es el índice int(w, 2) del vector de estado.
+def z_multicontrolada(qc, n):
+    """Z con n-1 controles sobre q_{n-1}: H · MCX · H. Cambia el signo solo de |1...1>."""
+    if n == 1:
+        qc.z(0)
+    else:
+        qc.h(n - 1)
+        qc.mcx(list(range(n - 1)), n - 1)
+        qc.h(n - 1)
+
+def oraculo_fase(w):
+    """O|x> = -|x> si x = w, |x> en otro caso. Se rodean con X los qubits en los que w tiene un 0."""
+    n = len(w)
+    qc = QuantumCircuit(n, name=f'O_{w}')
+    ceros = [j for j, b in enumerate(w[::-1]) if b == '0']
+    if ceros: qc.x(ceros)
+    z_multicontrolada(qc, n)
+    if ceros: qc.x(ceros)
+    return qc
+
+def difusion(n):
+    """D = 2|s><s| - I = H^n (2|0><0| - I) H^n.
+    X^n · MCZ · X^n = I - 2|0><0|, así que H^n X^n MCZ X^n H^n = -D; la fase global pi lo convierte exactamente en D."""
+    qc = QuantumCircuit(n, name='D')
+    qc.h(range(n)); qc.x(range(n))
+    z_multicontrolada(qc, n)
+    qc.x(range(n)); qc.h(range(n))
+    qc.global_phase = np.pi
+    return qc
+
+def grover(w, k, medir=True):
+    """H^n, k iteraciones G = D·O y (opcional) medida de los n qubits."""
+    n = len(w)
+    qc = QuantumCircuit(n, n) if medir else QuantumCircuit(n)
+    qc.h(range(n))
+    O, D = oraculo_fase(w).to_gate(), difusion(n).to_gate()
+    for _ in range(k):
+        qc.barrier()
+        qc.append(O, range(n))
+        qc.append(D, range(n))
+    if medir:
+        qc.barrier()
+        qc.measure(range(n), range(n))
+    return qc
+
+def p_teorica(k, N, M=1):
+    """P_k(w) = sen^2((2k+1) theta), sen theta = sqrt(M/N)."""
+    theta = np.arcsin(np.sqrt(M / N))
+    return np.sin((2 * k + 1) * theta) ** 2
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio 4.1: comprobación del oráculo, de la inversión respecto a la media y del circuito de $D$.},label={lst:b4_41}]
+n, N, w = 3, 8, '011'
+idx_w = int(w, 2)
+
+# Estado |a>: a_i = 1/sqrt(8) salvo a_3 = -1/sqrt(8)
+a = np.ones(N) / np.sqrt(N)
+a[idx_w] *= -1
+
+# (1) El oráculo aplicado a |s> produce exactamente |a>
+h3 = QuantumCircuit(n); h3.h(range(n))
+a_circ = Statevector(h3).evolve(oraculo_fase(w))
+print('O|s> = |a> :', np.allclose(a_circ.data, a))
+
+# (2) A mano: inversión respecto a la media  b_i = 2·media - a_i
+media = a.mean()                                  # (7 - 1)/(8·sqrt(8)) = 3/(4·sqrt(8))
+b_mano = 2 * media - a
+
+# (3) Con el circuito de D
+b_circ = Statevector(a).evolve(difusion(n))
+print('Operator(D) = 2|s><s| - I :', np.allclose(Operator(difusion(n)).data,
+      2 * np.outer(np.ones(N) / np.sqrt(N), np.ones(N) / np.sqrt(N)) - np.eye(N)))
+print('|b> circuito = |b> a mano :', np.allclose(b_circ.data, b_mano))
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicios 4.2 y 4.3: probabilidad de éxito frente a $k$, mínimo $k$ con el $90\%$ y primer $k$ con el $99\%$.},label={lst:b4_42}]
+n, N, w = 3, 8, '011'
+theta = np.arcsin(1 / np.sqrt(N))
+filas = []
+for k in range(5):
+    sv = Statevector(grover(w, k, medir=False))
+    c = simular(grover(w, k))
+    filas.append([k, f'{(2 * k + 1) * theta:.4f}', p_teorica(k, N), sv.probabilities_dict().get(w, 0), c.get(w, 0) / shots])
+
+k_min = next(k for k in range(50) if p_teorica(k, N) >= 0.90)
+
+# Algoritmo completo con k_min iteraciones
+qc_g = grover(w, k_min)
+counts_g = simular(qc_g)
+
+# Predicción: P_k en |w> y (1-P_k)/(N-1) en cada uno de los demás estados (en número de disparos)
+P = p_teorica(k_min, N)
+claves = [format(i, f'0{n}b') for i in range(N)]
+probs_teo = {c: (P if c == w else (1 - P) / (N - 1)) for c in claves}
+esperados = {c: int(round(p * shots)) for c, p in probs_teo.items()}
+p_chi = chisquare([counts_g.get(c, 0) for c in claves], [probs_teo[c] * shots for c in claves]).pvalue
+
+ks = np.arange(0, 16)
+P_teo = p_teorica(ks, N)
+P_sim = [simular(grover(w, int(k))).get(w, 0) / shots for k in ks]
+k_cont = (np.pi / (2 * theta) - 1) / 2            # k continuo donde (2k+1)θ = π/2
+k99 = next(int(k) for k, p in zip(ks, P_teo) if p >= 0.99)
+\end{lstlisting}
+
+\subsection{Bloque 5: estimación cuántica de fase}
+
+El qubit de conteo $j$ controla $U^{2^j}$ y a continuación se aplica la $\mathrm{QFT}^\dagger$ sobre el registro de conteo. El autovector $|1\rangle$ se prepara con una puerta $X$ sobre el qubit $q_t$.
+
+\begin{lstlisting}[caption={Circuito de QPE para una puerta de fase (ejercicios 5.1, 5.2 y 5.3).},label={lst:b5_qpe}]
+def qpe_circuit(t, gate: Gate):
+    cgate = gate.control(1)
+    qc = QuantumCircuit(t + 1, t,  name = f'Circuito QPE')
+    qc.h(range(t))
+    qc.x(t)
+    for i in range(t - 1, -1, -1):
+        times = 2**i
+        for _ in range(times):
+            qc.append(cgate, [i, t])
+    qc.append(QFTGate(t).inverse(), range(t))
+    qc.measure(range(t), range(t))
+    return qc
+
+u = PhaseGate(np.pi/2) # Theta = 1/4
+t = 2
+
+qc = qpe_circuit(t, u)
+counts = sim.run(transpile(qc, sim), shots = shots).result().get_counts()
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio E2.1: estados intermedios (puntos 1, 2 y 3) con \texttt{Statevector}.},label={lst:b5_e21}]
+#Apartados a), b)
+cu = u.control(1)
+qc = QuantumCircuit(t + 1, t, name = f'Circuito QPE')
+qc.x(t) # Preparo el estado |1> que es un autovector
+
+qc.h(range(t))
+point1 = Statevector(qc)
+
+for i in range(t - 1, -1, -1):
+    times = 2**i
+    for _ in range(times):
+        qc.append(cu, [i, t])
+point2 = Statevector(qc)
+
+qc.append(QFTGate(t).inverse(), range(t))
+point3 = Statevector(qc)
+qc.measure(range(t), range(t))
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio E2.2: estimación para $t=4,\dots,15$ y comprobación de la cota $2^{-(t+1)}$.},label={lst:b5_e22}]
+ts = [i for i in range(4, 16)]
+u = PhaseGate(2*np.pi/3)
+cu = u.control(1)
+theta = 1/3
+
+maxm = {}
+thetas = {}
+probs = {}
+abs_errors= {}
+for t in ts: 
+    qc = qpe_circuit(t, u)
+    counts = sim.run(transpile(qc, sim), shots = shots).result().get_counts()
+    m = max(counts, key = counts.get)
+    maxm[t] = m
+    thetas[t] = int(m, 2)/(2**t)
+    abs_errors[t] = abs(theta - int(m, 2)/(2**t)) 
+    probs[t] = counts[m]/shots
+
+ts = sorted(abs_errors)                          # errores = {t: error_abs}
+err = [abs_errors[t] for t in ts]
+cota = [2**-(t + 1) for t in ts]
+print(all(e <= c + 1e-12 for e, c in zip(err, cota)))
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio E2.3: puerta controlada de $U^{k}$ para $U=\mathrm{diag}(e^{2\pi i\varphi_0},e^{2\pi i\varphi_1})$ y QPE sobre el autovector $|0\rangle$.},label={lst:b5_e23}]
+phi0 = 0.275
+phi1 = 0.375
+t = 6
+
+def c_U_gate(phi0, phi1, power):
+    """Puerta controlada de U^power, U = diag(e^{2πi·phi0}, e^{2πi·phi1})."""
+    U = QuantumCircuit(1)
+    for _ in range(power):
+        U.rz(-phi0 * 4 * np.pi, 0)
+        U.p((phi1 + phi0) * 2 * np.pi, 0)
+    U = U.to_gate()
+    U.name = "U(%.3f, %.3f)^%i" % (phi0, phi1, power)
+    return U.control()
+
+# Autovector |0>
+qc0 = QuantumCircuit(t + 1, t)
+
+qc0.h(range(t))
+
+for i in range(t - 1, -1, -1):
+    qc0.append(c_U_gate(phi0, phi1, 2**i), [i, t])
+
+qc0.append(QFTGate(t).inverse(), range(t))
+
+qc0.measure(range(t), range(t))
+counts = sim.run(transpile(qc0, sim), shots = shots).result().get_counts()
+m0 = max(counts, key = counts.get)
+estimated_phase0 = int(m0, 2)/2**t
+error0 = abs(phi0 - estimated_phase0)
+print(fr'Fase estimada = {estimated_phase0} con error = {error0}')
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Ejercicio E2.4: QPE sobre una combinación lineal de autovectores y predicción teórica $P(m)$.},label={lst:b5_e24}]
+def qpe_psi(p0, medir_psi=False):
+    theta = 2 * np.arccos(np.sqrt(p0))
+    qc = QuantumCircuit(t + 1, t + 1 if medir_psi else t)
+    qc.ry(theta, t)                    # |psi> = c0|0> + c1|1> en el qubit t
+    qc.h(range(t))
+    for i in range(t):
+        qc.append(c_U_gate(phi0, phi1, 2**i), [i, t])   # tu c_U_gate del E2.3
+    qc.append(QFTGate(t).inverse(), range(t))
+    qc.measure(range(t), range(t))
+    if medir_psi:
+        qc.measure(t, t)               # para el apartado c)
+    return qc
+
+def prob_qpe(m, phi):
+    k = np.arange(2**t)
+    amp = np.exp(2j * np.pi * k * (phi - m / 2**t)).sum() / 2**t
+    return abs(amp) ** 2
+
+def prediccion(p0):
+    return {format(m, f"0{t}b"): p0 * prob_qpe(m, phi0) + (1 - p0) * prob_qpe(m, phi1)
+            for m in range(2**t)}
+
+
+p0 = 0.8
+counts = sim.run(transpile(qpe_psi(p0), sim), shots=shots).result().get_counts()
+pred = prediccion(p0)
+for m in (17, 18, 24):
+    s = format(m, f"0{t}b")
+\end{lstlisting}

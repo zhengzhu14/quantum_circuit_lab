@@ -9,17 +9,16 @@ los casos en los que un bloque se aparta de la convención general.
 \begin{itemize}
     \item \textbf{Software.} Python 3.12.3 en un cuaderno Jupyter, con \texttt{qiskit} (versión \texttt{2.6.1}), \\
     \texttt{qiskit-aer} (versión \texttt{0.18.2}),
-    \texttt{numpy}, \texttt{scipy} (test $\chi^2$), \texttt{matplotlib} y \texttt{tabulate}. % COMPLETAR: sustituir X.Y.Z con qiskit.__version__ y qiskit_aer.__version__
+    \texttt{numpy}, \texttt{scipy} (test $\chi^2$), \texttt{matplotlib} y \texttt{tabulate}. 
     \item \textbf{Histogramas de medida.} Se usa \texttt{AerSimulator()} con $4096$ disparos (\textit{shots}), salvo que se indique otra cosa en el ejercicio.
     Se elige porque el resultado pedido es una medida: simula el muestreo estadístico de un circuito con medidas, incluido el caso de un único disparo.
     \item \textbf{Vectores de estado y matrices.} Para las amplitudes en un punto intermedio del circuito se usa \texttt{Statevector} sobre el circuito \emph{sin medidas}, y
     \texttt{Operator} para comparar matrices de circuitos. Se eligen porque dan las amplitudes y fases exactas, que una medida no permite recuperar
     (por ejemplo, las fases relativas de los Bloques 2 y 5).
-    \item \textbf{Aleatoriedad.} Los conteos de los Bloques 1, 2 y 4 se obtienen con la semilla del simulador fijada (\texttt{seed\_simulator} $=98$), por lo que son
-    reproducibles bit a bit. En los Bloques 3 y 5 no se fija la semilla del simulador, de modo que los conteos exactos pueden variar ligeramente entre ejecuciones,
-    aunque los resultados cualitativos (por ejemplo, las medidas deterministas) no cambian.
-    % Si se añade seed_simulator=seed en los Bloques 3 y 5 y se vuelve a ejecutar, sustituir la última frase por:
-    % "Todos los conteos de la memoria se obtienen con la semilla del simulador fijada (\texttt{seed\_simulator} $=98$) y son reproducibles."
+    \item \textbf{Aleatoriedad.} Todos los conteos de la memoria se obtienen con la semilla del simulador fijada a $98$ (\texttt{seed\_simulator}), tanto en el constructor del
+    simulador como en la función de simulación de los Bloques 1, 2 y 4, de modo que el cuaderno reproduce exactamente las figuras y tablas. La única excepción es el experimento de un solo disparo
+    de los ejercicios 1.2 y 1.3, que usa una semilla distinta en cada repetición (\texttt{seed\_simulator} $=1000+s$) precisamente para obtener resultados independientes.
+    Las semillas de \texttt{random} y de \texttt{numpy} no controlan el muestreo de Aer y solo afectan al código Python propio.
     \item \textbf{Comparación teoría--simulación.} Los histogramas se contrastan con la predicción teórica; cuando se indica, mediante un test $\chi^2$ de bondad de ajuste
     con nivel de significación del $5\%$ (el resultado es compatible con la teoría si $p>0{,}05$). Con $4096$ disparos, el ruido estadístico típico de una
     probabilidad es $\sim1/\sqrt{4096}\approx0{,}016$.

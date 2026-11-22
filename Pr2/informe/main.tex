@@ -16,6 +16,7 @@
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{subcaption}
 \usepackage{booktabs}
+\usepackage{listings}
 
 
 % ---------- Tipografía: EB Garamond (si está instalada) ----------
@@ -40,7 +41,9 @@
 
 \addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
 
-\setcounter{secnumdepth}{0}
+%\setcounter{secnumdepth}{0}
+\newcounter{savedsecnumdepth}
+
 
 \begin{document}
 
@@ -52,13 +55,22 @@
 \newpage
 
 % ---------- Secciones (cada una en su propio fichero) ----------
-\include{sections/objetivos}
+%\include{sections/objetivos}
+%\include{sections/entorno_convencion}
+\setcounter{savedsecnumdepth}{\value{secnumdepth}}         % guarda el valor de tu clase
+\setcounter{secnumdepth}{0}
+\include{sections/objetivos}                                          % o tu \section{Objetivos}
 \include{sections/entorno_convencion}
+\setcounter{secnumdepth}{\value{savedsecnumdepth}} 
 \include{sections/bloque1}
 \include{sections/bloque2}
 \include{sections/bloque3}
 \include{sections/bloque4}
 \include{sections/bloque5}
+
+
+\setcounter{secnumdepth}{0}      % a partir de aquí, sin numerar
+\include{sections/conclusiones}
 \include{sections/apendice}
 
 % ---------- Bibliografía (opcional) ----------

@@ -1,4 +1,4 @@
-\section{Bloque 3}\label{sec:bloque_3}
+\section{Bloque 3. Algoritmos de consulta: Deutsch, Deutsch-Jozsa y Bernstein-Vazirani}\label{sec:bloque_3}
 
 \subsection{Ejercicio 3.1: Algoritmo de Deutsch}
 En el siguiente ejercicio se implementa el Algoritmo de Deutsch para cada uno de los casos de funciones binarias de una variable.
@@ -61,7 +61,7 @@ y el histograma de la medida sobre el qubit de dato $q_0$. La simulación coinci
 \end{figure}
 
 \textbf{Oraculo d.} Oráculo de la función inversa, $f(x) = NOT(x)$. Es una función balanceada, por lo tanto tras ejecutar el algoritmo
-de Deutsch se debería de medir en el qubit de dato $q_0$ el estado $\ket{1}$. En la Figura~\ref{fig:bloque3_e3_1_c} se observa el circuito del algoritmo
+de Deutsch se debería de medir en el qubit de dato $q_0$ el estado $\ket{1}$. En la Figura~\ref{fig:bloque3_e3_1_d} se observa el circuito del algoritmo
 y el histograma de la medida sobre el qubit de dato $q_0$. La simulación coincide con la predicción. 
 
 \begin{figure}[h]
@@ -81,7 +81,7 @@ y el histograma de la medida sobre el qubit de dato $q_0$. La simulación coinci
 
 
 \subsection{Ejercicio 3.2: Deutsch-Jozsa con \texorpdfstring{$n=2$}{n=2}}
-En el siguiente ejercicio se implementa el algoritmo de Deutsch-Josza para una serie de funciones y se evalúa los histogramas de la simulación.
+En el siguiente ejercicio se implementa el algoritmo de Deutsch-Jozsa para una serie de funciones y se evalúa los histogramas de la simulación.
 
 \textbf{Función a.} Función constante 0, $f(x_1, x_0) = 0$. En la Figura~\ref{fig:bloque3_e3_2_a} se muestra el oráculo para la 
 función especificada en este apartado. Al ser una funcion constante, el valor medido en los qubits de datos tras la ejecución del algoritmo sería
@@ -98,8 +98,8 @@ $\ket{00}$ que efectivamente se cumple en el histograma mostrado en la Figura me
         \includegraphics[width=0.75\textwidth]{imagenes/bloque3/e3_2_histograma_a.png}
         \caption{}
     \end{subfigure}
-    \caption{(a): Circuito construido para Oráculo d. \\
-    (b): Histograma del algoritmo de Deutsch para el Oráculo d.}\label{fig:bloque3_e3_2_a}
+    \caption{(a): Circuito construido para Oráculo a. \\
+    (b): Histograma del algoritmo de Deutsch-Jozsa para el Oráculo a.}\label{fig:bloque3_e3_2_a}
 \end{figure}
 
 \textbf{Función b.} Función $f(x_1, x_0) = x_1 \oplus x_0$. En la Figura~\ref{fig:bloque3_e3_2_b} se muestra el oráculo implementado
@@ -117,8 +117,8 @@ $\ket{11}$ lo que indica que la función es balanceada.
         \includegraphics[width=0.75\textwidth]{imagenes/bloque3/e3_2_histograma_b.png}
         \caption{}
     \end{subfigure}
-    \caption{(a): Circuito construido para Oráculo d. \\
-    (b): Histograma del algoritmo de Deutsch para el Oráculo d.}\label{fig:bloque3_e3_2_b}
+    \caption{(a): Circuito construido para Oráculo b. \\
+    (b): Histograma del algoritmo de Deutsch-Jozsa para el Oráculo b.}\label{fig:bloque3_e3_2_b}
 \end{figure}
 
 \begin{figure}[h]
@@ -126,22 +126,22 @@ $\ket{11}$ lo que indica que la función es balanceada.
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=0.45\textwidth]{imagenes/bloque3/e3_2_oraculo_c.png}
         \caption{}
-    \end{subfigure}s
+    \end{subfigure}
     %\hfill
     \begin{subfigure}{0.4\textwidth}
         \includegraphics[width=0.75\textwidth]{imagenes/bloque3/e3_2_histograma_c.png}
         \caption{}
     \end{subfigure}
-    \caption{(a): Circuito construido para Oráculo d. \\
-    (b): Histograma del algoritmo de Deutsch para el Oráculo d.}\label{fig:bloque3_e3_2_c}
+    \caption{(a): Circuito construido para Oráculo c. \\
+    (b): Histograma del algoritmo de Deutsch-Jozsa para el Oráculo c.}\label{fig:bloque3_e3_2_c}
 \end{figure}
 
-\textbf{Función c.} Función $f(x_1, x_0) = x_1 \land x_0$. En la Figura~\ref{fig:bloque3_e3_2_b} se muestra el oráculo implementado
+\textbf{Función c.} Función $f(x_1, x_0) = x_1 \land x_0$. En la Figura~\ref{fig:bloque3_e3_2_c} se muestra el oráculo implementado
 para esta función junto al histograma del resultado de la medida tras la ejecución del algoritmo. El oráculo se implementa con una puerta Toffoli
 que permite sumar la operación AND sobre los dos primeros qubits al último qubit. En el histograma se observa que el estado final 
 tras el algoritmo es un estado de superposición de estados en los cuales se incluye el $\ket{00}$ y otros que no son este estado. 
 Por tanto, se puede decir que la función $f$ en este caso no cumple la condición de ser balanceada o constante necesario para que el 
-algoritmo de Deutsch-Josza sea decidible. Como conclusión, podemos afirmar que la función no es balanceada ni constante.
+algoritmo de Deutsch-Jozsa sea decidible. Como conclusión, podemos afirmar que la función no es balanceada ni constante.
 
 
 \subsection{Ejercicio 3.3: Bernstein-Vazirani}\label{subsection:ejercicio3_3}
@@ -182,7 +182,7 @@ se incluye el oráculo correspondiente junto al histograma de la ejecución con 
         \includegraphics[width=0.8\textwidth]{imagenes/bloque3/e3_3_histograma_a2.png}
         \caption{}
     \end{subfigure}
-    \caption{(a): Oráculo para la clave $a = 11010$. \\
+    \caption{(a): Oráculo para la clave $a = 1101$. \\
     (b): Histograma de la ejecución del algoritmo para obtener la clave $a = 1101$}\label{fig:bloque3_e3_3_a2}
 \end{figure}
 

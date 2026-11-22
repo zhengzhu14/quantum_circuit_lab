@@ -1,1 +1,90 @@
 \section{Conclusiones}\label{sec:conclusiones}
+
+En esta práctica se han implementado y simulado con Qiskit los elementos básicos de la algoritmia cuántica, desde los oráculos reversibles hasta la estimación cuántica de fase.
+En todos los ejercicios la simulación ha coincidido, dentro de la fluctuación estadística de $4096$ disparos, con la predicción teórica calculada a mano o con \texttt{Statevector}.
+Las conclusiones se organizan según los objetivos de la Sección~\nameref{sec:objetivos}, seguidas de las ideas que atraviesan toda la memoria y de las limitaciones del trabajo.
+
+%--------------------------------------------------------------------
+\subsection{Conclusiones por objetivo}
+
+\paragraph{Oráculos reversibles (Bloque 1 y ejercicio 2.5).} Una función booleana que no es reversible por sí sola (el AND, o una función $\{0,1\}^4\to\{0,1\}^4$ no inyectiva)
+se implementa como la permutación $U_f|x\rangle|y\rangle=|x\rangle|y\oplus f(x)\rangle$, que es unitaria y cumple $U_f^2=I$. Con ella se construyeron el AND con una puerta Toffoli,
+el XOR con dos CNOT, un oráculo de 3 bits con tres puertas multicontroladas y uno de 4 bits de entrada y 4 de salida con 32 puertas. En todas las entradas de cada oráculo
+(4, 4, 8, 16 y 32 entradas en los ejercicios 1.1, 1.3, 1.4, 1.5 y 1.6) la salida coincide con la tabla de verdad con probabilidad 1 y la entrada se mide intacta.
+La construcción importa para el coste: el oráculo lineal $f(x)=x_4\oplus x_3\oplus x_1$ necesita 3 CNOT, frente a las 16 puertas multicontroladas que requeriría la construcción por minitérminos.
+Con la entrada en superposición, el paralelismo cuántico no equivale a leer toda la tabla: cada disparo devuelve una sola de las cuatro filas, que son equiprobables
+(test $\chi^2$ con $p=0{,}979$ para el AND y $p=0{,}723$ para el XOR), y hacen falta en media $8{,}29$ disparos (simulado) frente a $25/3\approx8{,}33$ (teórico) para verlas todas.
+
+\paragraph{Retroceso de fase (Bloque 2).} Si el objetivo de una puerta controlada está en un autovector, su autovalor aparece como \emph{fase relativa} en el control, y el objetivo no cambia.
+Con $CP(\pi/4)$ el qubit de control gira $\pi/4$ alrededor del eje $z$ de la esfera de Bloch, mientras que la misma puerta $P(\pi/4)$ sin control es una fase global y no se observa.
+Con el CNOT y el objetivo en $|{-}\rangle$ el control pasa de $|{+}\rangle$ a $|{-}\rangle$ y se mide $1$ con probabilidad 1, de modo que la medida \emph{revela} el autovalor de $X$;
+con $X$ sin control se mide $0$ en ambos casos. En el barrido de $CP(\theta)$ se obtiene $P(q_0=1)=\sin^2(\theta/2)$ con una desviación máxima de $0{,}0047$ respecto a la simulación,
+y se comprueba que $CP(\theta)^k=CP(k\theta)$, que es lo que permite implementar $U^{2^j}$ en QPE. En el ejercicio 2.5, con la ancilla en $|{-}\rangle$ el oráculo booleano se convierte
+en un oráculo de fase, $U_f|x\rangle|{-}\rangle=(-1)^{f(x)}|x\rangle|{-}\rangle$, y el único autovalor $-1$ corresponde a $|1\rangle|{-}\rangle$.
+
+\paragraph{Algoritmos de Deutsch, Deutsch-Jozsa y Bernstein-Vazirani (Bloque 3).} Con una sola consulta al oráculo, Deutsch separa las funciones constantes (se mide $0$) de las balanceadas (se mide $1$)
+en los cuatro oráculos de una variable, frente a las 2 evaluaciones que necesita un algoritmo clásico. En Deutsch-Jozsa con $n=2$, la función constante da $|00\rangle$ y la función XOR
+da $|11\rangle$ (balanceada), con 1 consulta frente a 3 en el peor caso clásico. La función AND no es ni constante ni balanceada: el resultado es una superposición que incluye $|00\rangle$ y otros estados, de modo que el algoritmo
+no puede decidir. Esto ilustra que Deutsch-Jozsa depende de la promesa sobre $f$. Bernstein-Vazirani recupera las claves $a=1010$ y $a=1101$ con un único disparo y una sola consulta, frente a las 4 de un algoritmo clásico.
+En el ejercicio E1 la medida $01$ indica que la función es balanceada, y la tabla de verdad obtenida ($f=\overline{x_1}$) es coherente con el análisis como función afín, con $s=(0,1)$ y $b=1$.
+
+\paragraph{Algoritmo de Grover (Bloque 4).} Para $N=8$ y $w=011$, una iteración lleva la amplitud del estado marcado de $-0{,}354$ a $5/(2\sqrt8)\approx0{,}884$ y su probabilidad de $0{,}125$ a $0{,}781$, tal como se calculó a mano.
+El mínimo $k$ con al menos un $90\%$ de éxito es $k=2$: $P_2=0{,}9453$ teórica y $0{,}9475$ simulada, con $3872$ y $3881$ conteos para $|011\rangle$ ($\chi^2$ con $p=0{,}654$). Iterar más no mejora el resultado:
+$P_3=0{,}330$, porque cada iteración gira el estado un ángulo $2\theta$ y con $k=3$ se sobrepasa el estado marcado. Alcanzar el $99\%$ no es posible en la primera subida ($k=1{,}673$ no es entero),
+pero sí con $k=6$, que da $P_6=0{,}9998$ teórica y $0{,}9993$ simulada. El resultado es muy sensible a $k$ ($P_5=0{,}548$ y $P_7=0{,}577$). Con $k=2$ bastan 2 consultas al oráculo frente a las $\approx N/2=4$ de media clásicas,
+pero con $k=6$ ya se necesitan más que las clásicas, de modo que para un $N$ tan pequeño solo hay ahorro de consultas en el primer caso.
+
+\paragraph{Estimación cuántica de fase (Bloque 5).} Cuando la fase es diádica la estimación es exacta y determinista: la puerta $S$ con $t=2$ da $m=1$ ($\tilde\varphi=1/4$), y $\theta=3/32$ con $t=5$ da $m=3$ con error nulo.
+Cuando no lo es, el error queda acotado por $2^{-(t+1)}$: para $\theta=1/3$ y $t=3$ se obtiene $m=3$, $\tilde\varphi=0{,}375$ y un error de $0{,}042<0{,}0625$, con $P(3)=0{,}6878$ teórica y $2826/4096\approx0{,}690$ medida.
+Al aumentar $t$ el error de $\theta=1/3$ se reduce a la mitad por cada qubit ($0{,}02083$, $0{,}01042$ y $0{,}00521$ para $t=4,5,6$), y $t=6$ es el menor valor que garantiza un error inferior a $0{,}01$.
+Para $\theta=2/5$ pasar de $t=2$ a $t=5$ reduce el error de $0{,}1$ a $0{,}00625$ (un factor $16$). En cambio, la probabilidad del pico \emph{no} tiende a 1 sino a $27/(4\pi^2)\approx0{,}684$, porque
+$1/3$ queda siempre a $1/3$ de marca de la rejilla $m/2^t$: más qubits mejoran la estimación, pero no la probabilidad de obtener un único valor de $m$. Con el operador diagonal de dos fases ($t=6$)
+el autovector $|1\rangle$ da $m=24$ sin error y $|0\rangle$ da $m=18$ con error $0{,}00625$, porque $\varphi_0=0{,}275$ no es diádica. Con una superposición $c_0|0\rangle+c_1|1\rangle$ aparecen los dos picos, $m=18$ y $m=24$,
+con un peso proporcional a $|c_a|^2$ ($0{,}461$ observado frente a $0{,}458$ previsto para $m=18$ y $0{,}206$ frente a $0{,}202$ para $m=24$ con $|c_0|^2=0{,}8$), y medir el registro de conteo equivale a medir $U$:
+el estado $|\psi\rangle$ colapsa sobre uno de sus autovectores.
+
+%--------------------------------------------------------------------
+\subsection{Ideas transversales}
+
+\paragraph{El retroceso de fase como hilo conductor.} El mismo mecanismo aparece en los Bloques 3, 4 y 5: la ancilla en $|{-}\rangle$ convierte el oráculo booleano en un oráculo de fase $(-1)^{f(x)}$ en Deutsch, Deutsch-Jozsa y Bernstein-Vazirani,
+el oráculo de Grover marca el estado con un signo $-1$ y QPE lee en el registro de conteo la fase del autovalor de $U$. Los ejercicios del Bloque 2, con un solo control y un solo autovector, son la versión mínima de todos ellos.
+
+\paragraph{Concordancia entre teoría y simulación.} La Tabla~\ref{tab:conclusiones_resumen} reúne las comprobaciones cuantitativas principales. Todos los tests $\chi^2$ dan $p>0{,}05$ y las desviaciones
+observadas son del orden del ruido estadístico típico $1/\sqrt{4096}\approx0{,}016$ o menores. Se ha usado \texttt{Statevector} cuando se necesitaban amplitudes y fases exactas, y \texttt{AerSimulator} cuando el resultado pedido era una medida.
+
+\begin{table}[htbp]
+    \centering
+    {\small\setlength{\tabcolsep}{4pt}
+    \begin{tabular}{c|p{0.40\textwidth}|c|c}
+    \hline
+    Bloque & Magnitud & Teórico & Simulado \\
+    \hline
+    1 & Disparos medios para ver las 4 filas (ej.~1.2) & $8{,}33$ & $8{,}29$ \\
+    2 & $P(q_0=1)$ para $\theta=\pi/4$ (ej.~2.4) & $0{,}1464$ & $0{,}1511$ \\
+    4 & $P_2$ de Grover, $N=8$ & $0{,}9453$ & $0{,}9475$ \\
+    4 & $P_6$ de Grover, $N=8$ & $0{,}9998$ & $0{,}9993$ \\
+    5 & $P(m=3)$ en QPE con $t=3$, $\theta=1/3$ & $0{,}6878$ & $0{,}690$ \\
+    5 & Pico de QPE para $\theta=1/3$, $t=4,5,6$ & $0{,}685;\ 0{,}684;\ 0{,}684$ & $0{,}683;\ 0{,}686;\ 0{,}682$ \\
+    5 & $P(m=18)$ y $P(m=24)$ con $|c_0|^2=0{,}8$ & $0{,}458;\ 0{,}202$ & $0{,}461;\ 0{,}206$ \\
+    \hline
+    \end{tabular}}
+    \caption{Resumen de las comprobaciones teoría--simulación más relevantes.}\label{tab:conclusiones_resumen}
+\end{table}
+
+\paragraph{Ventaja cuántica y sus límites.} Los algoritmos de los Bloques 3 y 4 resuelven el problema con menos consultas que el caso clásico (1 frente a 2, 3 y 4 en Deutsch, Deutsch-Jozsa y Bernstein-Vazirani con $n=1,2,4$),
+pero la ventaja depende de las hipótesis del problema (la promesa de Deutsch-Jozsa, la forma lineal de Bernstein-Vazirani) y del tamaño: en Grover con $N=8$ se pierde cuando se exige el $99\%$ de éxito.
+
+\paragraph{Convenios de bits y reproducibilidad.} Los resultados se leen correctamente solo si se conoce el convenio de orden de los bits. Se ha seguido el convenio \textit{little-endian} de Qiskit en todos los bloques, salvo en el ejercicio 3.3 y en el E1,
+donde se invierte la asignación de bits clásicos y está indicado en cada caso (Sección~\nameref{sec:entorno_convenciones}). Con la semilla del simulador fijada, el cuaderno reproduce las figuras y las tablas de la memoria.
+
+%--------------------------------------------------------------------
+\subsection{Limitaciones y trabajo futuro}
+
+Todas las simulaciones son ideales y sin ruido, por lo que resultados como la probabilidad exacta 1 de los oráculos o los picos limpios de QPE no son extrapolables a un dispositivo real.
+Además, los tamaños son pequeños ($n\le4$ en los oráculos, $N=8$ en Grover, $t\le6$ en la mayor parte de QPE), y la comparación de consultas entre algoritmos cuánticos y clásicos es teórica, no una medida de tiempo.
+Como continuación natural se proponen:
+\begin{itemize}
+    \item introducir un modelo de ruido en \texttt{AerSimulator} o ejecutar en hardware real, y medir cómo afectan la profundidad del circuito y el número de puertas multicontroladas a Grover y a QPE;
+    \item extender Grover a varios estados marcados y a un número de soluciones desconocido, y ver cómo cambia el número óptimo de iteraciones;
+    \item reducir el coste de QPE con variantes que usan menos qubits de conteo, como la estimación iterativa de fase, y relacionarla con aplicaciones como la factorización de Shor.
+\end{itemize}

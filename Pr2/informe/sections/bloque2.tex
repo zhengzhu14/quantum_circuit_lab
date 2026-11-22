@@ -1,4 +1,4 @@
-\section{Bloque 2}\label{sec:bloque_2}
+\section{Bloque 2. Retroceso de fase y oráculos de fase }\label{sec:bloque_2}
 
 \textbf{Convenios del bloque.} Los estados de dos qubits se escriben $|q_1q_0\rangle$ (convenio \emph{little-endian} de Qiskit): $q_0$ es el qubit de la derecha y es siempre el qubit de control. Las predicciones teóricas se calculan a mano y se contrastan con \texttt{Statevector} sobre el circuito sin medidas, que da las amplitudes exactas tras cada puerta. Las esferas de Bloch se obtienen con \texttt{plot\_bloch\_multivector}; para tabularlas se calculan los valores esperados $(\langle X\rangle,\langle Y\rangle,\langle Z\rangle)$ de cada qubit, lo que sigue siendo válido aunque el qubit esté entrelazado. Cuando se pide una probabilidad de medida se usa \texttt{AerSimulator} con 4096 disparos y semilla fija.
 
