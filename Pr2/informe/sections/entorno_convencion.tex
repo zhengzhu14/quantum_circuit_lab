@@ -1,0 +1,99 @@
+\section{Entorno de trabajo y convenciones}\label{sec:entorno_convenciones}
+
+Esta sección recoge el software y los simuladores empleados, y las convenciones de notación que se siguen en toda la memoria, indicando de forma explícita
+los casos en los que un bloque se aparta de la convención general.
+
+%--------------------------------------------------------------------
+\subsection{Entorno de trabajo}\label{subsec:entorno}
+
+\begin{itemize}
+    \item \textbf{Software.} Python 3.12.3 en un cuaderno Jupyter, con \texttt{qiskit} (versión \texttt{2.6.1}), \\
+    \texttt{qiskit-aer} (versión \texttt{0.18.2}),
+    \texttt{numpy}, \texttt{scipy} (test $\chi^2$), \texttt{matplotlib} y \texttt{tabulate}. % COMPLETAR: sustituir X.Y.Z con qiskit.__version__ y qiskit_aer.__version__
+    \item \textbf{Histogramas de medida.} Se usa \texttt{AerSimulator()} con $4096$ disparos (\textit{shots}), salvo que se indique otra cosa en el ejercicio.
+    Se elige porque el resultado pedido es una medida: simula el muestreo estadístico de un circuito con medidas, incluido el caso de un único disparo.
+    \item \textbf{Vectores de estado y matrices.} Para las amplitudes en un punto intermedio del circuito se usa \texttt{Statevector} sobre el circuito \emph{sin medidas}, y
+    \texttt{Operator} para comparar matrices de circuitos. Se eligen porque dan las amplitudes y fases exactas, que una medida no permite recuperar
+    (por ejemplo, las fases relativas de los Bloques 2 y 5).
+    \item \textbf{Aleatoriedad.} Los conteos de los Bloques 1, 2 y 4 se obtienen con la semilla del simulador fijada (\texttt{seed\_simulator} $=98$), por lo que son
+    reproducibles bit a bit. En los Bloques 3 y 5 no se fija la semilla del simulador, de modo que los conteos exactos pueden variar ligeramente entre ejecuciones,
+    aunque los resultados cualitativos (por ejemplo, las medidas deterministas) no cambian.
+    % Si se añade seed_simulator=seed en los Bloques 3 y 5 y se vuelve a ejecutar, sustituir la última frase por:
+    % "Todos los conteos de la memoria se obtienen con la semilla del simulador fijada (\texttt{seed\_simulator} $=98$) y son reproducibles."
+    \item \textbf{Comparación teoría--simulación.} Los histogramas se contrastan con la predicción teórica; cuando se indica, mediante un test $\chi^2$ de bondad de ajuste
+    con nivel de significación del $5\%$ (el resultado es compatible con la teoría si $p>0{,}05$). Con $4096$ disparos, el ruido estadístico típico de una
+    probabilidad es $\sim1/\sqrt{4096}\approx0{,}016$.
+\end{itemize}
+
+La Tabla~\ref{tab:entorno_simuladores} resume qué simulador se ha usado en cada bloque.
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{c|p{0.4\textwidth}|p{0.35\textwidth}}
+    \hline
+    Bloque & \texttt{AerSimulator} (medidas) & \texttt{Statevector} / \texttt{Operator} (amplitudes) \\
+    \hline
+    1 & Tablas de verdad e histogramas (disparos) & Predicción en superposición; verificación $U_f^2=I$ \\
+    2 & Probabilidades de medir $q_0$; tabla de verdad de $U_f$ & Estados tras cada puerta, esferas de Bloch, autovalores $\lambda$ \\
+    3 & Histogramas de Deutsch, Deutsch-Jozsa y Bernstein-Vazirani (un solo disparo en BV) & --- \\
+    4 & Histogramas de Grover y $P_k$ simulada & Amplitudes $a_i$, $b_i$ y $P_k$ exacta \\
+    5 & Histogramas de QPE & Estados en los puntos 1--3 del circuito (E2.1) \\
+    \hline
+    \end{tabular}
+    \caption{Simulador empleado en cada bloque y motivo de su uso.}\label{tab:entorno_simuladores}
+\end{table}
+
+%--------------------------------------------------------------------
+\subsection{Convenciones de notación}\label{subsec:convenciones}
+
+\paragraph{Orden de los bits (\textit{little-endian}).} Qiskit usa el convenio \textit{little-endian}: el qubit $q_0$ es el menos significativo. Un estado de $n$ qubits se escribe
+$|q_{n-1}\dots q_1q_0\rangle$ y corresponde al elemento de índice $\sum_j q_j2^j$ del vector de estado. Al medir con la asignación habitual $q_j\to c_j$, la cadena de
+medida es $c_{n-1}\dots c_1c_0$: el bit de la \emph{derecha} es el del qubit $q_0$. En los oráculos, la variable de entrada $x_j$ vive en el qubit $q_j$ y el bit
+$f_j$ de la salida se suma (XOR) al qubit $q_{n+j}$, por lo que la cadena medida se lee $f_{m-1}\dots f_0\,x_{n-1}\dots x_0$ (salida a la izquierda, entrada a la derecha).
+
+\paragraph{Fases.} Como se pide en el enunciado, la fase de un autovalor se escribe $\lambda=e^{2\pi i\theta}$ con $\theta\in[0,1)$, es decir, en \emph{fracciones de vuelta}.
+La puerta de fase $P(\varphi)=\mathrm{diag}(1,e^{i\varphi})$ se parametriza con el ángulo $\varphi$ en radianes, por lo que su fase en fracciones de vuelta es $\theta=\varphi/2\pi$
+(por ejemplo, $P(\pi/2)$ tiene $\theta=1/4$). En QPE con $t$ qubits de conteo, si se mide $m$, la fase estimada es $\tilde\varphi=m/2^t$ y el error es $|\tilde\varphi-\theta|$.
+
+\paragraph{Esfera de Bloch.} Los vectores de Bloch se calculan a partir de los valores esperados $(\langle X\rangle,\langle Y\rangle,\langle Z\rangle)$ de cada qubit, lo que
+sigue siendo válido cuando el qubit está entrelazado con otros. La fase relativa de un qubit se ve como un giro alrededor del eje $z$; una fase global no se ve.
+
+\paragraph{Probabilidades.} Las probabilidades simuladas son las frecuencias relativas $\text{conteo}/\text{shots}$, y los histogramas se muestran en conteos
+(número de disparos) salvo que se indique lo contrario.
+
+\paragraph{Convenciones de cada bloque y excepciones.} La Tabla~\ref{tab:entorno_convenios} indica la correspondencia entre variables, qubits y bits de la cadena medida
+en cada bloque. Los Bloques 1, 2 y 4 siguen la convención general sin excepciones. Las particularidades están en los Bloques 3 y 5.
+
+\begin{table}[htbp]
+    \centering
+    {\small\setlength{\tabcolsep}{4pt}
+    \begin{tabular}{c|p{0.30\textwidth}|p{0.22\textwidth}|p{0.28\textwidth}}
+    \hline
+    Bloque & Variables y qubits & Asignación de medida & Cadena medida \\
+    \hline
+    1 & $x_j\to q_j$; $f_j\to q_{n+j}$ & $q_j\to c_j$ & $f_{m-1}\dots f_0\,x_{n-1}\dots x_0$ \\
+    2 & Dato $x\equiv q_0$, ancilla $y\equiv q_1$ (2.5); control $q_0$ y objetivo $q_1$ & $q_j\to c_j$ & $q_1q_0$ \\
+    3.1, 3.2 & Deutsch: dato $q_0$, ancilla $q_1$. Deutsch-Jozsa ($n=2$): $f(x_1,x_0)$, $x_j\to q_j$, ancilla $q_2$ & $q_j\to c_j$ & $q_1q_0$ (datos) \\
+    3.3 y E1 & \textbf{Orden inverso:} la clave $a$ y la entrada se escriben con el bit de $q_0$ a la izquierda: $a=a_0a_1a_2a_3$; $f(x_0,x_1)$ & \textbf{Invertida:} $q_j\to c_{n-1-j}$ & Se lee $q_0q_1\dots q_{n-1}$ \\
+    4 & $w=x_{n-1}\dots x_0$, $x_j\to q_j$; $|w\rangle$ es el índice $\mathrm{int}(w,2)$ & $q_j\to c_j$ & $c_{n-1}\dots c_0$ \\
+    5 & Registro de conteo en $q_0\dots q_{t-1}$; autovector en $q_t$; el qubit de conteo $j$ controla $U^{2^j}$ & $q_j\to c_j$ & $c_{t-1}\dots c_0$ ($=m$ en binario) \\
+    \hline
+    \end{tabular}}
+    \caption{Correspondencia entre variables, qubits y cadena de medida en cada bloque.}\label{tab:entorno_convenios}
+\end{table}
+
+\subsubsection*{Bloque 3: Bernstein-Vazirani y ejercicio E1 (orden inverso)}
+En el ejercicio 3.3 el oráculo de la clave oculta se construye escribiendo $a$ con el bit de $q_0$ a la izquierda, es decir $a=a_0a_1a_2a_3$ y una puerta CNOT desde
+cada $q_j$ con $a_j=1$ hacia la ancilla $q_4$. Por ejemplo, para $a=1010$ hay CNOT desde $q_0$ y $q_2$, y para $a=1101$ desde $q_0$, $q_1$ y $q_3$. Esta notación es la contraria
+a la de Qiskit (y a la del ejercicio 1.6, donde $a=a_4\dots a_0$). Para que la cadena medida se lea igual que la clave se invierte la asignación de bits clásicos,
+\texttt{measure(range(4), range(3, -1, -1))}, es decir $q_j\to c_{3-j}$, de forma que la cadena $c_3c_2c_1c_0$ se lee $q_0q_1q_2q_3$. De manera análoga, en el ejercicio E1
+la función se escribe $f(x_0,x_1)$ con $q_0$ primero, y se mide con \texttt{measure([0, 1], [1, 0])}, de modo que la cadena $|q_0q_1\rangle$ se lee con $q_0$ a la izquierda
+y la tabla de verdad se ordena con $x=2x_0+x_1$. En el ejercicio 3.2 (Deutsch-Jozsa con $n=2$) \emph{no} se invierte: $f(x_1,x_0)$ y la cadena medida es $c_1c_0=x_1x_0$.
+
+\subsubsection*{Bloque 5: QPE}
+En QPE el registro de conteo ocupa los qubits $q_0,\dots,q_{t-1}$ y el autovector el qubit $q_t$. El qubit de conteo $j$ controla $U^{2^j}$ y a continuación se aplica la
+$\mathrm{QFT}^\dagger$ (\texttt{QFTGate(t).inverse()}) sobre el registro de conteo. La medida usa la asignación estándar $q_j\to c_j$ (\texttt{measure(range(t), range(t))}),
+sin inversión: la cadena $c_{t-1}\dots c_0$ es directamente la representación binaria de $m$, con $q_{t-1}$ como bit más significativo, y la fase estimada es $\tilde\varphi=m/2^t$.
+Los estados del sistema completo se escriben con el autovector a la izquierda, $|{\psi_{\text{autovector}}}\rangle\otimes|{\text{registro de conteo}}\rangle$; por ejemplo,
+en E2.1 ($t=3$) el ket $|1000\rangle$ corresponde a $q_3=1$ y $q_2q_1q_0=000$. Cuando se mide también el qubit del autovector (E2.4~c), este es el bit clásico más
+significativo de la cadena, $c_tc_{t-1}\dots c_0$.
