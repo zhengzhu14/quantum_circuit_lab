@@ -647,7 +647,6 @@ for t in ts:
     thetas[t] = int(m, 2)/(2**t)
     abs_errors[t] = abs(theta - int(m, 2)/(2**t)) 
     probs[t] = counts[m]/shots
-
 ts = sorted(abs_errors)                          # errores = {t: error_abs}
 err = [abs_errors[t] for t in ts]
 cota = [2**-(t + 1) for t in ts]
@@ -671,14 +670,11 @@ def c_U_gate(phi0, phi1, power):
 
 # Autovector |0>
 qc0 = QuantumCircuit(t + 1, t)
-
 qc0.h(range(t))
-
 for i in range(t - 1, -1, -1):
     qc0.append(c_U_gate(phi0, phi1, 2**i), [i, t])
 
 qc0.append(QFTGate(t).inverse(), range(t))
-
 qc0.measure(range(t), range(t))
 counts = sim.run(transpile(qc0, sim), shots = shots).result().get_counts()
 m0 = max(counts, key = counts.get)
@@ -694,7 +690,7 @@ def qpe_psi(p0, medir_psi=False):
     qc.ry(theta, t)                    # |psi> = c0|0> + c1|1> en el qubit t
     qc.h(range(t))
     for i in range(t):
-        qc.append(c_U_gate(phi0, phi1, 2**i), [i, t])   # tu c_U_gate del E2.3
+        qc.append(c_U_gate(phi0, phi1, 2**i), [i, t])  
     qc.append(QFTGate(t).inverse(), range(t))
     qc.measure(range(t), range(t))
     if medir_psi:
@@ -709,7 +705,6 @@ def prob_qpe(m, phi):
 def prediccion(p0):
     return {format(m, f"0{t}b"): p0 * prob_qpe(m, phi0) + (1 - p0) * prob_qpe(m, phi1)
             for m in range(2**t)}
-
 
 p0 = 0.8
 counts = sim.run(transpile(qpe_psi(p0), sim), shots=shots).result().get_counts()

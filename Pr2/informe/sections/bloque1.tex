@@ -1,4 +1,4 @@
-\section{Bloque 1. Computacion reversible y oráculos booleanos}\label{sec:bloque_1}
+\section{Bloque 1. Computación reversible y oráculos booleanos}\label{sec:bloque_1}
 \subsection{Ejercicio 1.1. Puerta AND reversible}
 Se implementa $|a_1a_0\rangle|0\rangle \to |a_1a_0\rangle|a_1\wedge a_0\rangle$ con una puerta Toffoli: controles
 en $q_0\equiv a_0$ y $q_1\equiv a_1$, objetivo en la ancilla $q_2\equiv y$, inicializada a $|0\rangle$.
@@ -107,20 +107,20 @@ encajan con las fluctuaciones estadísticas esperables con 4096 disparos.
 independientes (cambiando la semilla del simulador en cada una) y se anota la fila \texttt{y a1 a0} obtenida. En todas las ejecuciones se
 obtiene una única fila, distinta de una ejecución a otra, y tras las diez ejecuciones se han visto tres de las cuatro filas posibles: ninguna ejecución
 individual da la tabla completa. Después se almacena el resultado de cada disparo de una misma tanda y se cuenta cuántas filas distintas se han observado
-tras $k$ disparos (Figura~\ref{fig:bloque1_e1_2_experimento}, izquierda): en la tanda de 40 disparos la tabla se completa en el disparo número 5, no antes.
+tras $k$ disparos (Figura~\ref{fig:bloque1_e1_2_experimento}, izquierda): en la tanda de 40 disparos la tabla se completa en el disparo número 8, no antes.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{imagenes/bloque1/e1_2_experimento_1_disparo.png}
     \caption{Experimento de un solo disparo en el ejercicio 1.2.
     Izquierda: filas distintas observadas en función del número de disparos en una tanda; la curva parte de una sola fila y necesita varios disparos para llegar a las cuatro.
-    Derecha: histograma del número de disparos necesarios para observar las cuatro filas, repitiendo el experimento 6034 veces; la media simulada ($8{,}29$)
+    Derecha: histograma del número de disparos necesarios para observar las cuatro filas, repitiendo el experimento 6015 veces; la media simulada ($8{,}31$)
     coincide con la teórica $nH_n=25/3\approx 8{,}33$.}\label{fig:bloque1_e1_2_experimento}
 \end{figure}
 
 El histograma de la derecha de la Figura~\ref{fig:bloque1_e1_2_experimento} muestra que el mínimo número de disparos necesarios es 4 y que la distribución tiene una cola larga hacia la derecha
 (en algunas repeticiones se necesitan más de 20 disparos). Incluso con exactamente 4 disparos solo se obtiene la tabla completa con probabilidad
-$4!/4^4=24/256\approx 9{,}4\%$ (en la simulación, un $9{,}8\%$), mientras que con un solo disparo esa probabilidad es exactamente 0.
+$4!/4^4=24/256\approx 9{,}4\%$ (en la simulación, un $9{,}4\%$), mientras que con un solo disparo esa probabilidad es exactamente 0.
 
 %--------------------------------------------------------------------
 \subsection{Ejercicio 1.3. Puerta XOR reversible}

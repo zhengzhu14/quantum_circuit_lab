@@ -2,7 +2,7 @@
 
 En esta práctica se han implementado y simulado con Qiskit los elementos básicos de la algoritmia cuántica, desde los oráculos reversibles hasta la estimación cuántica de fase.
 En todos los ejercicios la simulación ha coincidido, dentro de la fluctuación estadística de $4096$ disparos, con la predicción teórica calculada a mano o con \texttt{Statevector}.
-Las conclusiones se organizan según los objetivos de la Sección~\nameref{sec:objetivos}, seguidas de las ideas que atraviesan toda la memoria y de las limitaciones del trabajo.
+Las conclusiones se organizan según los objetivos de la sección~\nameref{sec:objetivos}, seguidas de las ideas que atraviesan toda la memoria y de las limitaciones del trabajo.
 
 %--------------------------------------------------------------------
 \subsection{Conclusiones por objetivo}
@@ -13,7 +13,7 @@ el XOR con dos CNOT, un oráculo de 3 bits con tres puertas multicontroladas y u
 (4, 4, 8, 16 y 32 entradas en los ejercicios 1.1, 1.3, 1.4, 1.5 y 1.6) la salida coincide con la tabla de verdad con probabilidad 1 y la entrada se mide intacta.
 La construcción importa para el coste: el oráculo lineal $f(x)=x_4\oplus x_3\oplus x_1$ necesita 3 CNOT, frente a las 16 puertas multicontroladas que requeriría la construcción por minitérminos.
 Con la entrada en superposición, el paralelismo cuántico no equivale a leer toda la tabla: cada disparo devuelve una sola de las cuatro filas, que son equiprobables
-(test $\chi^2$ con $p=0{,}979$ para el AND y $p=0{,}723$ para el XOR), y hacen falta en media $8{,}29$ disparos (simulado) frente a $25/3\approx8{,}33$ (teórico) para verlas todas.
+(test $\chi^2$ con $p=0{,}979$ para el AND y $p=0{,}723$ para el XOR), y hacen falta en media $8{,}31$ disparos (simulado) frente a $25/3\approx8{,}33$ (teórico) para verlas todas.
 
 \paragraph{Retroceso de fase (Bloque 2).} Si el objetivo de una puerta controlada está en un autovector, su autovalor aparece como \emph{fase relativa} en el control, y el objetivo no cambia.
 Con $CP(\pi/4)$ el qubit de control gira $\pi/4$ alrededor del eje $z$ de la esfera de Bloch, mientras que la misma puerta $P(\pi/4)$ sin control es una fase global y no se observa.
@@ -59,7 +59,7 @@ observadas son del orden del ruido estadístico típico $1/\sqrt{4096}\approx0{,
     \hline
     Bloque & Magnitud & Teórico & Simulado \\
     \hline
-    1 & Disparos medios para ver las 4 filas (ej.~1.2) & $8{,}33$ & $8{,}29$ \\
+    1 & Disparos medios para ver las 4 filas (ej.~1.2) & $8{,}33$ & $8{,}31$ \\
     2 & $P(q_0=1)$ para $\theta=\pi/4$ (ej.~2.4) & $0{,}1464$ & $0{,}1511$ \\
     4 & $P_2$ de Grover, $N=8$ & $0{,}9453$ & $0{,}9475$ \\
     4 & $P_6$ de Grover, $N=8$ & $0{,}9998$ & $0{,}9993$ \\
@@ -75,7 +75,7 @@ observadas son del orden del ruido estadístico típico $1/\sqrt{4096}\approx0{,
 pero la ventaja depende de las hipótesis del problema (la promesa de Deutsch-Jozsa, la forma lineal de Bernstein-Vazirani) y del tamaño: en Grover con $N=8$ se pierde cuando se exige el $99\%$ de éxito.
 
 \paragraph{Convenios de bits y reproducibilidad.} Los resultados se leen correctamente solo si se conoce el convenio de orden de los bits. Se ha seguido el convenio \textit{little-endian} de Qiskit en todos los bloques, salvo en el ejercicio 3.3 y en el E1,
-donde se invierte la asignación de bits clásicos y está indicado en cada caso (Sección~\nameref{sec:entorno_convenciones}). Con la semilla del simulador fijada, el cuaderno reproduce las figuras y las tablas de la memoria.
+donde se invierte la asignación de bits clásicos y está indicado en cada caso (sección~\nameref{sec:entorno_convenciones}). Con la semilla del simulador fijada, el cuaderno reproduce las figuras y las tablas de la memoria.
 
 %--------------------------------------------------------------------
 \subsection{Limitaciones y trabajo futuro}
